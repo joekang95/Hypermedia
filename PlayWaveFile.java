@@ -4,9 +4,13 @@ import java.io.FileNotFoundException;
 public class PlayWaveFile extends Thread{
 	
     private String filename = "";
+    private boolean pause = false;
+    private int frame = 0;
     
-    PlayWaveFile(String f){
+    PlayWaveFile(String f, boolean r, int c){
     	filename = f;
+    	pause = r;
+    	frame = c;
     }
     
     PlaySound playSound;
@@ -16,16 +20,16 @@ public class PlayWaveFile extends Thread{
 		try {
 		    inputStream = new FileInputStream(filename);
 		} catch (FileNotFoundException e) {
-		    e.printStackTrace();
-		    return;
-		}
-	
+			e.printStackTrace();
+			return;
+		}	
+		
 		// initializes the playSound Object
 		playSound = new PlaySound(inputStream);
-	
+
 		// plays the sound
 		try {
-		    playSound.play();
+			playSound.play(pause, frame);
 		} catch (PlayWaveException e) {
 		    e.printStackTrace();
 		    return;
@@ -36,8 +40,8 @@ public class PlayWaveFile extends Thread{
 		playSound.stop();
 	}
 	
-	public void pauseMusic() {
-		playSound.stop();
+	public void pauseMusic(int frame) {
+		playSound.pause();
 	}
 
 }

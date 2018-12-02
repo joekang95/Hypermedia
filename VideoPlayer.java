@@ -5,6 +5,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.*;
 import java.io.*;
 
@@ -12,7 +14,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class VideoPlayer implements ListSelectionListener, ActionListener {
+public class VideoPlayer implements ListSelectionListener, ActionListener, MouseListener {
 
 	static int IMAGE_WIDTH = 352;
     static int IMAGE_HEIGHT = 288;
@@ -20,7 +22,32 @@ public class VideoPlayer implements ListSelectionListener, ActionListener {
 	static String items[] = {"USCOne", "USCTwo", "LondonOne", "LondonTwo", "NYOne", "NYTwo", "AIFilmOne", "AIFilmTwo"};
 	static String videoLocation[] = {"./USC/", "./USC/", "./London/", "./London/", "./NewYorkCity/", "./NewYorkCity/", "./AIFilm/", "./AIFilm/"};
 	
-	private boolean playing = false;
+	/*File folder = new File(".\\Film");
+    File[] listOfFiles = folder.listFiles();
+    String[] listOfFolders = new String[listOfFiles.length];
+
+    for (int i = 0; i < listOfFiles.length; i++) {
+      if (listOfFiles[i].isFile()) {
+        //System.out.println("File " + listOfFiles[i].getName());
+      } else if (listOfFiles[i].isDirectory()) {
+        //System.out.println("Directory " + listOfFiles[i].getName());
+        listOfFolders[i] = listOfFiles[i].getName();
+      }
+       
+    }
+    folder = new File(".\\Film.\\" + listOfFolders[0] + ".\\" + listOfFolders[0] + "One");
+    File[] listOfFiles2 = folder.listFiles();
+     
+    for (int i = 0; i < listOfFiles2.length; i++) {
+      if (listOfFiles2[i].isFile()) {
+        System.out.println("File " + listOfFiles2[i].getName());
+      } else if (listOfFiles2[i].isDirectory()) {
+        System.out.println("Directory " + listOfFiles2[i].getName());
+      }
+       
+    }*/
+	
+	private boolean playing = false, resume = false;
     private String filename = "";
     private String header = "./USC/";
     private Timer timer;
@@ -59,6 +86,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener {
 		progressBar.setValue(0);
 		progressBar.setStringPainted(false);
 	    progressBar.setVisible(true);
+	    progressBar.addMouseListener(this);
 	    
 	    progressTime = new JTextField("0:00/5:00");
 	    progressTime.setEditable(false);
@@ -220,27 +248,71 @@ public class VideoPlayer implements ListSelectionListener, ActionListener {
 	            	if(counter == 9000){
 	            		timer.stop();
 	            		sound.stopMusic();
+	            		progressTime.setText("0:00/5:00");
+	                    progressBar.setValue(0);
 	            	}
 	            }
 	        });
 			timer.start();	
-			if(counter == 1) {
-				sound = new PlayWaveFile(header + videoList.getSelectedValue() + "/" + videoList.getSelectedValue() + ".wav");
-			}
+			sound = new PlayWaveFile(header + videoList.getSelectedValue() + "/" + videoList.getSelectedValue() + ".wav", resume, counter);
+			
 			sound.start();
 			playing = true;
 		}
 		if(e.getActionCommand() == "Pause") {
 			timer.stop();	
 			playing = false;
-			sound.pauseMusic();
+			sound.pauseMusic(counter);
+			resume = true;
 		}
 		if(e.getActionCommand() == "Stop") {
 			timer.stop();
 			counter = 1;
 			playing = false;
+			resume = false;
 			sound.stopMusic();
+    		readImg(header + videoList.getSelectedValue() + "/" + videoList.getSelectedValue() + String.format("%04d", counter) + ".rgb");
+    		panel2.revalidate();
+    		panel2.repaint();
+            progressBar.setValue(0);
+    		progressTime.setText("0:00/5:00");
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		 //Retrieves the mouse position relative to the component origin.
+	     int mouseX = e.getX();
+	     //Computes how far along the mouse is relative to the component width then multiply it by the progress bar's maximum value.
+	     int progressBarVal = (int)Math.round(((double)mouseX / (double)progressBar.getWidth()) * progressBar.getMaximum());
+	     progressBar.setValue(progressBarVal);
+	     int min = progressBarVal / 60, ten = (progressBarVal % 60) / 10, sec = (progressBarVal % 60) % 10;
+	     progressTime.setText(min + ":" + ten + sec + "/5:00");
+	     counter = progressBarVal * 30;	
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
