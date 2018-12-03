@@ -13,16 +13,16 @@ public class Main {
             }
         });
         
+        Arrays.sort(directory);
         
         HyperVideo[] videos = new HyperVideo[directory.length];
         for(int i = 0 ; i < directory.length ; i++) {
-            System.out.println(directory[i].toString());
             videos[i] = new HyperVideo(directory[i].toString(), 352, 288);
             System.out.println("Finish Importing Video  " + videos[i].getName());
         }
         
-        //VideoPlayer videoPlayer = new VideoPlayer(videos);
-        new VideoEditor(videos);
+        VideoPlayer videoPlayer = new VideoPlayer(videos);
+        //new VideoEditor(videos);
     }
      
 }

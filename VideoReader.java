@@ -25,7 +25,7 @@ public class VideoReader {
         };
         IMAGE_WIDTH = width;
         IMAGE_HEIGHT = height;
- 
+        Arrays.sort(rgbFiles);
         System.out.println("Importing Frames");
         return rgbFiles;
     }
