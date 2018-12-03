@@ -1,4 +1,3 @@
-package Final;
 import java.io.File;
  
 public class Main {

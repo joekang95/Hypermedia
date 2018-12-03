@@ -1,4 +1,3 @@
-package Final;
 public class HyperVideo {
      
     private int IMAGE_WIDTH, IMAGE_HEIGHT ;
