@@ -1,3 +1,4 @@
+package Final;
 @SuppressWarnings("serial")
 public class PlayWaveException extends Exception {
 
