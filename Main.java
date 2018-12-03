@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileFilter;
  
 public class Main {
      
@@ -6,12 +7,20 @@ public class Main {
  
     public static void main(String[] args) {
         File folder = new File("./Film");
-        File[] directory = folder.listFiles();
+        File[] directory = folder.listFiles(new FileFilter(){
+            public boolean accept(File file){
+                return file.isDirectory();
+            }
+        });
+        
+        
         HyperVideo[] videos = new HyperVideo[directory.length];
         for(int i = 0 ; i < directory.length ; i++) {
+            System.out.println(directory[i].toString());
             videos[i] = new HyperVideo(directory[i].toString(), 352, 288);
             System.out.println("Finish Importing Video  " + videos[i].getName());
         }
+        
         //VideoPlayer videoPlayer = new VideoPlayer(videos);
         new VideoEditor(videos);
     }
