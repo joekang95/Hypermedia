@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.BufferedInputStream;
- 
+import java.io.BufferedInputStream; 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -59,20 +58,23 @@ public class PlaySound {
             while (readBytes != -1) {
                 if(pause){
                     pause = false;
-                    float b = audioFormat.getFrameSize() * audioFormat.getFrameRate() * seconds;
-                    // round to nearest full frame
-                    long n = (long) ((b / audioFormat.getFrameSize()) * audioFormat.getFrameSize());
+                    int bytesPerSecond = audioFormat.getFrameSize() * (int)audioFormat.getFrameRate();
+                    long n = (long) (bytesPerSecond * seconds);
+                    n = n - (n % 4);
                     offset = (int)n % EXTERNAL_BUFFER_SIZE;
-                    readBytes = audioInputStream.read(audioBuffer, offset, audioBuffer.length - offset);
-                    //System.out.println(seconds + "  " + b + "   " + n);
-                    audioInputStream.skip(n);
+                    audioBuffer = new byte[this.EXTERNAL_BUFFER_SIZE];
+                    readBytes = audioInputStream.read(audioBuffer, 0, audioBuffer.length - offset);
+                    
+                    System.out.println(readBytes);
+                    System.out.println(audioInputStream.available() + "  " + seconds + "   " + n);
+          audioInputStream.skip(n);
                 }
                 else{
                     offset = 0; 
                     readBytes = audioInputStream.read(audioBuffer, 0, audioBuffer.length);
                 }
                 if (readBytes >= 0){
-                    dataLine.write(audioBuffer, 0, readBytes);
+                    dataLine.write(audioBuffer, offset, readBytes);
                     //bytesRead += readBytes;
                     //long totalFrames = audioInputStream.getFrameLength(); 
                     //long framesRead = bytesRead / audioFormat.getFrameSize();
