@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -34,16 +35,18 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     static int IMAGE_HEIGHT = 288;
     static BufferedImage leftImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
     static BufferedImage rightImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
-     
+
     private int frameCounter = 0, leftListTracker = 0, rightListTracker = -1;
     JFrame frame = new JFrame("HyperVideo Linking Tool");
     JPanel panel = new JPanel();
-    JPanel leftVideo = new JPanel();
+    private static JPanel leftVideo = new JPanel();
     JPanel rightVideo = new JPanel();
     JPanel buttons = new JPanel();
     JButton create = new JButton("Create Link");
+    JButton cancel = new JButton("Cancel Link");
     JButton connect = new JButton("Connect");
     JButton save = new JButton("Save");
+    JButton delete = new JButton("Delete");
     JButton leftNext = new JButton("< Next Frame");
     JButton leftPre = new JButton("< Previous Frame");
     JButton rightNext = new JButton("Next Frame >");
@@ -55,20 +58,31 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     JMenuBar menuBar = new JMenuBar();
     JMenu menu = new JMenu("Menu");
     JMenuItem player = new JMenuItem("Open Video Player");
+    JLayeredPane leftLayer = new JLayeredPane();
      
     HyperVideo[] videos;
-     
-    VideoEditor(HyperVideo[] v){
-        videos = v;
+    LayerPanel[][] layers = new LayerPanel[9000][100];
+    int[] layerCounter = new int[9000];
+    
+    VideoEditor(HyperVideo[] videos){
+        this.videos = videos; 
+        IMAGE_WIDTH = videos[leftListTracker].getWidth();
+        IMAGE_HEIGHT = videos[leftListTracker].getHeight();
         GUI();
         readImg(leftImg, videos[leftListTracker].getFrame(0));
     }
      
     public void updateImage(int index){
         if(index == 0) {
+            leftLayer.removeAll();
             readImg(leftImg, videos[leftListTracker].getFrame(frameCounter));
-            leftVideo.revalidate();
-            leftVideo.repaint();
+        	int counter = layerCounter[frameCounter];
+            if(layers[frameCounter][0] != null) {
+            	for(int i = 1 ; i <= counter ; i++) {
+			        leftLayer.add(layers[frameCounter][i - 1], i - 1);	
+		        }	
+            }
+            leftLayer.add(leftVideo, counter);		
         }
         else if(index == 1) {
             readImg(rightImg, videos[rightListTracker].getFrame(frameCounter));
@@ -110,6 +124,8 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         create.addActionListener(this);
         connect.addActionListener(this);
         save.addActionListener(this);
+        cancel.addActionListener(this);
+        delete.addActionListener(this);
          
         leftSlider = new JSlider(0, 9000);
         leftSlider.setMajorTickSpacing(1000);
@@ -150,6 +166,8 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
          
         panel.setLayout(new GridBagLayout());GridBagConstraints c = new GridBagConstraints();
         buttons.setLayout(new GridBagLayout());GridBagConstraints b = new GridBagConstraints();
+        leftLayer.setLayout(null);
+        leftLayer.setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
  
         c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.CENTER;
@@ -165,7 +183,10 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         c.gridheight = 3;
         c.insets = new Insets(10,6,8,0);  // padding
         leftVideo.add(new JLabel(new ImageIcon (leftImg)));
-        panel.add(leftVideo, c);
+        leftVideo.setOpaque(false);
+        leftVideo.setSize(leftLayer.getPreferredSize());
+        leftLayer.add(leftVideo, 100);		
+        panel.add(leftLayer, c);
          
         b.fill = GridBagConstraints.HORIZONTAL;
         b.anchor = GridBagConstraints.CENTER;
@@ -176,14 +197,22 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
  
         b.gridx = 0;
         b.gridy = 1;
-        buttons.add(connect, b);
+        buttons.add(cancel, b);
  
         b.gridx = 0;
         b.gridy = 2;
-        buttons.add(save, b);
+        buttons.add(connect, b);
  
         b.gridx = 0;
         b.gridy = 3;
+        buttons.add(save, b);
+ 
+        b.gridx = 0;
+        b.gridy = 4;
+        buttons.add(delete, b);
+ 
+        b.gridx = 0;
+        b.gridy = 5;
         buttons.add(hyperLinkList, b);
  
         c.gridx = 4;
@@ -240,7 +269,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
         frame.setResizable(false);
     }
-     
+    
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if(e.getValueIsAdjusting() == false) {
@@ -258,13 +287,39 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
                 updateImage(1);
                 rightSlider.setEnabled(true);
             }
-             
         }
     }
  
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == create) {
+        	int counter = layerCounter[frameCounter];
+        	if(counter == 0) {
+		        leftLayer.removeAll();
+		        LayerPanel newLayer = new LayerPanel(IMAGE_WIDTH, IMAGE_HEIGHT);
+		        leftLayer.add(newLayer, 0);	
+		        leftLayer.add(leftVideo, 1);	
+		        layers[frameCounter][counter] = newLayer;
+		        layerCounter[frameCounter] = 1;
+        	}
+        	else if(counter > 0){
+		        leftLayer.removeAll();
+		        LayerPanel newLayer = new LayerPanel(IMAGE_WIDTH, IMAGE_HEIGHT);
+		        leftLayer.add(newLayer, 0);
+		        for(int i = 1 ; i <= counter ; i++) {
+			        leftLayer.add(layers[frameCounter][i - 1], i);	
+		        }	
+		        leftLayer.add(leftVideo, counter + 1);	
+		        layers[frameCounter][counter] = newLayer;
+		        layerCounter[frameCounter]++;	
+        	}
+        }
+        if(e.getSource() == cancel) {
+        	int counter = layerCounter[frameCounter];
+        	leftLayer.remove(leftLayer.getIndexOf(layers[frameCounter][counter - 1]));
+        	leftLayer.revalidate();
+        	leftLayer.repaint();	
+        	layerCounter[frameCounter]--;
         }
         if(e.getSource() == connect) {
         }
