@@ -21,7 +21,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
      
     private boolean playing = false, resume = false;
     private Timer timer;
-    private int frameCounter = 0, listTracker = 0;
+    private int frameCounter = 1, listTracker = 0;
  
     PlayWaveFile sound;
     JFrame frame = new JFrame();
@@ -165,7 +165,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
                 timer.stop();
                 sound.stopMusic();
             }
-            frameCounter = 0;
+            frameCounter = 1;
             progressTime.setText("0:00/5:00");
             progressBar.setValue(0);
             videoPanel.removeAll();
@@ -180,29 +180,31 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == play) {
-            timer = new Timer(1000/30, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    updateImage();
-                    if(frameCounter > 1 && frameCounter % 30 == 0){
-                        int tmp = frameCounter / 30;
-                        int min = tmp / 60, ten = (tmp % 60) / 10, sec = (tmp % 60) % 10;
-                        progressTime.setText(min + ":" + ten + sec + "/5:00");
-                        progressBar.setValue(tmp);
+            if(!playing){
+                timer = new Timer(1000/30, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        updateImage();
+                        if(frameCounter > 1 && frameCounter % 30 == 0){
+                            int tmp = frameCounter / 30;
+                            int min = tmp / 60, ten = (tmp % 60) / 10, sec = (tmp % 60) % 10;
+                            progressTime.setText(min + ":" + ten + sec + "/5:00");
+                            progressBar.setValue(tmp);
+                            play.getModel().setPressed(false);
+                        }
+                        if(frameCounter == 9000){
+                            timer.stop();
+                            sound.stopMusic();
+                            progressTime.setText("0:00/5:00");
+                            progressBar.setValue(0);
+                        }
                     }
-                    if(frameCounter == 9000){
-                        timer.stop();
-                        sound.stopMusic();
-                        progressTime.setText("0:00/5:00");
-                        progressBar.setValue(0);
-                    }
-                }
-            });
-            timer.start();  
-            sound = new PlayWaveFile(videos[listTracker].getAudio(), resume, frameCounter);
-             
-            sound.start();
-            playing = true;
+                }); 
+                sound = new PlayWaveFile(videos[listTracker].getAudio(), resume, frameCounter);     
+                sound.start();
+                timer.start(); 
+                playing = true;
+            }
         }
         if(e.getSource() == pause) {
             timer.stop();   
@@ -212,7 +214,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         }
         if(e.getSource() == stop) {
             timer.stop();
-            frameCounter = 0;
+            frameCounter = 1;
             playing = false;
             resume = false;
             sound.stopMusic();
