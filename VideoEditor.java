@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -18,14 +19,16 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
  
-public class VideoEditor implements ListSelectionListener, ActionListener, MouseListener {
+public class VideoEditor implements ListSelectionListener, ActionListener, MouseListener, ChangeListener {
      
     static int IMAGE_WIDTH = 352;
     static int IMAGE_HEIGHT = 288;
@@ -46,7 +49,8 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     JButton rightNext = new JButton("Next Frame >");
     JButton rightPre = new JButton("Previous Frame >");
     JList<String> leftVideoList, rightVideoList;
-    JProgressBar leftProgressBar, rightProgressBar;
+    JComboBox<String> hyperLinkList;
+    JSlider leftSlider, rightSlider;
     JTextField leftProgressTime, rightProgressTime;
     JMenuBar menuBar = new JMenuBar();
     JMenu menu = new JMenu("Menu");
@@ -84,6 +88,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         for(HyperVideo v : videos) {
             listModel.addElement(v.getName());
         }
+        
         leftVideoList = new JList<String>(listModel);
         leftVideoList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         leftVideoList.setSelectedIndex(0);
@@ -97,22 +102,33 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         rightVideoList.addListSelectionListener(this);
         JScrollPane rightListScrollPane = new JScrollPane(rightVideoList);
         rightListScrollPane.setPreferredSize(new Dimension(130, 280));
+        
+        hyperLinkList = new JComboBox<String>();
+        hyperLinkList.setEditable(false);
+        hyperLinkList.setEnabled(false);
          
         create.addActionListener(this);
         connect.addActionListener(this);
         save.addActionListener(this);
          
-        leftProgressBar = new JProgressBar(0, 9000);
-        leftProgressBar.setValue(0);
-        leftProgressBar.setStringPainted(false);
-        leftProgressBar.setVisible(true);
-        leftProgressBar.addMouseListener(this);
-         
-        rightProgressBar = new JProgressBar(0, 9000);
-        rightProgressBar.setValue(0);
-        rightProgressBar.setStringPainted(false);
-        rightProgressBar.setVisible(true);
-        rightProgressBar.addMouseListener(this);
+        leftSlider = new JSlider(0, 9000);
+        leftSlider.setMajorTickSpacing(1000);
+        leftSlider.setMinorTickSpacing(500);
+        leftSlider.setValue(0);
+        leftSlider.setPaintTicks(true);
+        leftSlider.setPaintLabels(true);
+        leftSlider.addMouseListener(this);
+        leftSlider.addChangeListener(this);
+        
+        rightSlider = new JSlider(0, 9000);
+        rightSlider.setMajorTickSpacing(1000);
+        rightSlider.setMinorTickSpacing(500);
+        rightSlider.setValue(0);
+        rightSlider.setEnabled(false);
+        rightSlider.setPaintTicks(true);
+        rightSlider.setPaintLabels(true);
+        rightSlider.addMouseListener(this);
+        rightSlider.addChangeListener(this);
          
         leftProgressTime = new JTextField("------");
         leftProgressTime.setEditable(false);
@@ -155,32 +171,20 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         b.anchor = GridBagConstraints.CENTER;
         b.gridx = 0;
         b.gridy = 0;
-        b.insets = new Insets(0,6,8,6);  // padding
-        buttons.add(leftNext, b);
- 
-        b.gridx = 0;
-        b.gridy = 1;
-        buttons.add(leftPre, b);
- 
-        b.gridx = 0;
-        b.gridy = 2;
+        b.insets = new Insets(0,6,15,6);  // padding
         buttons.add(create, b);
  
         b.gridx = 0;
-        b.gridy = 3;
+        b.gridy = 1;
         buttons.add(connect, b);
  
         b.gridx = 0;
-        b.gridy = 4;
+        b.gridy = 2;
         buttons.add(save, b);
  
         b.gridx = 0;
-        b.gridy = 5;
-        buttons.add(rightNext, b);
- 
-        b.gridx = 0;
-        b.gridy = 6;
-        buttons.add(rightPre, b);
+        b.gridy = 3;
+        buttons.add(hyperLinkList, b);
  
         c.gridx = 4;
         c.gridy = 0;
@@ -207,13 +211,13 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         c.gridy = 3;
         c.gridwidth = 3;
         c.gridheight = 1;
-        c.insets = new Insets(0,8,10,0);  //padding
-        panel.add(leftProgressBar, c);
+        c.insets = new Insets(0,-3,10,-10);  //padding
+        panel.add(leftSlider, c);
  
         c.gridx = 5;
         c.gridy = 3;
-        c.insets = new Insets(0,8,10,0);  //padding
-        panel.add(rightProgressBar, c);
+        c.insets = new Insets(0,-3,10,-10);  //padding
+        panel.add(rightSlider, c);
  
         c.gridx = 0;
         c.gridy = 3;
@@ -230,7 +234,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         frame.getContentPane().add(panel);
         frame.pack();           
         frame.setJMenuBar(menuBar); 
-        frame.setSize(1200, 430);
+        frame.setSize(1150, 430);
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
@@ -242,16 +246,17 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         if(e.getValueIsAdjusting() == false) {
             frameCounter = 0;
             if(e.getSource() == leftVideoList) {
-                leftProgressBar.setValue(1);
+            	leftSlider.setValue(0);
                 leftProgressTime.setText("Frame 0001");
                 leftListTracker = leftVideoList.getSelectedIndex();
                 updateImage(0); 
             }
             if(e.getSource() == rightVideoList) {
-                rightProgressBar.setValue(1);
+            	rightSlider.setValue(0);
                 rightProgressTime.setText("Frame 0001");
                 rightListTracker = rightVideoList.getSelectedIndex();
                 updateImage(1);
+                rightSlider.setEnabled(true);
             }
              
         }
@@ -272,22 +277,19 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     public void mouseClicked(MouseEvent e) {
         //Retrieves the mouse position relative to the component origin.
         int mouseX = e.getX();
-        if(e.getSource() == leftProgressBar) {
-            //Computes how far along the mouse is relative to the component width then multiply it by the progress bar's maximum value.
-            int progressBarVal = (int)Math.round(((double)mouseX / (double)leftProgressBar.getWidth()) * leftProgressBar.getMaximum());
-            leftProgressBar.setValue(progressBarVal);
-            leftProgressTime.setText("Frame " + String.format("%04d", progressBarVal));
-            frameCounter = progressBarVal;  
+        if(e.getSource() == leftSlider) {
+            int sliderVal = (int)Math.round(((double)mouseX / (double)leftSlider.getWidth()) * leftSlider.getMaximum());
+            leftSlider.setValue(sliderVal);
+            leftProgressTime.setText("Frame " + String.format("%04d", sliderVal));
+            frameCounter = sliderVal;  
             updateImage(0);
         }
-        else if(e.getSource() == rightProgressBar) {
-            if(rightListTracker != -1) {
-                int progressBarVal = (int)Math.round(((double)mouseX / (double)rightProgressBar.getWidth()) * rightProgressBar.getMaximum());
-                rightProgressBar.setValue(progressBarVal);
-                rightProgressTime.setText("Frame " + String.format("%04d", progressBarVal));
-                frameCounter = progressBarVal;  
-                updateImage(1);
-            }
+        if(e.getSource() == rightSlider) {
+            int sliderVal = (int)Math.round(((double)mouseX / (double)rightSlider.getWidth()) * rightSlider.getMaximum());
+            rightSlider.setValue(sliderVal);
+            rightProgressTime.setText("Frame " + String.format("%04d", sliderVal));
+            frameCounter = sliderVal;  
+            updateImage(1);
         }
     }
  
@@ -311,4 +313,33 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     public void mouseReleased(MouseEvent e) {
          
     }
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if(e.getSource() == leftSlider) {
+			int sliderVal = leftSlider.getValue();
+            if(sliderVal < 9000) {
+                leftProgressTime.setText("Frame " + String.format("%04d", sliderVal + 1));
+            	frameCounter = sliderVal;  
+            	updateImage(0); 
+            }
+            if(sliderVal == 9000) {
+                leftProgressTime.setText("Frame " + String.format("%04d", sliderVal));
+            	
+            }
+		}
+		if(e.getSource() == rightSlider) {
+			int sliderVal = rightSlider.getValue();
+            if(sliderVal < 9000) {
+                rightProgressTime.setText("Frame " + String.format("%04d", sliderVal + 1));
+            	frameCounter = sliderVal;  
+            	updateImage(1); 
+            }
+            if(sliderVal == 9000) {
+            	rightProgressTime.setText("Frame " + String.format("%04d", sliderVal));
+            	
+            }
+		}
+		
+	}
 }

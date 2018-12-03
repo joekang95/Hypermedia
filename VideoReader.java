@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -26,7 +25,7 @@ public class VideoReader {
         });
         
         String[] rgbFiles = new String[listOfFiles.length];
-        for(int i=0; i < listOfFiles.length; i++) {
+        for(int i = 0 ; i < listOfFiles.length ; i++) {
         	rgbFiles[i] = listOfFiles[i].getPath();
         }
         
@@ -43,7 +42,7 @@ public class VideoReader {
         });
         
         String audioFile = null;
-        for(int i=0; i < listOfFiles.length; i++) {
+        for(int i = 0 ; i < listOfFiles.length ; i++) {
         	audioFile = listOfFiles[i].getPath();
         	break;
         }
