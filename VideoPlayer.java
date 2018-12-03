@@ -16,7 +16,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
  
     static int IMAGE_WIDTH = 352;
     static int IMAGE_HEIGHT = 288;
-    static BufferedImage img = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+    static BufferedImage img = null;
     static String items[];
      
     private boolean playing = false, resume = false;
@@ -39,10 +39,13 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
      
     HyperVideo[] videos;
      
-    VideoPlayer(HyperVideo[] v){
-        videos = v;
+    VideoPlayer(HyperVideo[] videos){
+        this.videos = videos; 
+        IMAGE_WIDTH = videos[listTracker].getWidth();
+        IMAGE_HEIGHT = videos[listTracker].getHeight();
+        img = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        readImg(videos[listTracker].getFrame(0)); 
         GUI();
-        readImg(videos[listTracker].getFrame(0));
     }
      
     public void updateImage(){
@@ -53,7 +56,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     }
       
     public static void readImg(String fileName) {
-        VideoReader.importImage(img, fileName);
+    	VideoReader.importImage(img, fileName);
     }
      
     private void GUI() {

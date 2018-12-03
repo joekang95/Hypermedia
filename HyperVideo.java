@@ -1,16 +1,15 @@
 public class HyperVideo {
      
-    private int IMAGE_WIDTH, IMAGE_HEIGHT ;
-    private String img[] = new String[9000];
+    private int width, height ;
+    private String img[];
     private String audio;
     private String name;
      
-    HyperVideo(String[] img, String audio, String name,int width, int height){
-        IMAGE_WIDTH = width;
-        IMAGE_HEIGHT = height;
+    HyperVideo(String[] img, String audio, String name, int width, int height){
+        this.width = width;
+        this.height = height;
         this.img = img;
         this.audio = audio;
-        //String[] parts = directory.split("/");
         this.name = name;
     }
      
@@ -25,13 +24,17 @@ public class HyperVideo {
     String getFrame(int i) {
         return img[i];
     }
+    
+    int getFrameSize() {
+    	return img.length;
+    }
      
     int getWidth() {
-        return IMAGE_WIDTH;
+        return width;
     }
      
     int getHeight() {
-        return IMAGE_HEIGHT;
+        return height;
     }
      
 }

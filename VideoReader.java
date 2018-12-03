@@ -1,67 +1,63 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
  
 public class VideoReader {
-     
-    static int FRAME_SIZE = 9000;
-    static int IMAGE_WIDTH, IMAGE_HEIGHT;
-    
-    public static HyperVideo importVideo(String directory, int width, int height){
-        HyperVideo video;
-        String[] img = importFrame(directory, width, height);
-        String audio = importAudio(directory);
-        String name = importName(directory);
-        video = new HyperVideo(img, audio, name, width, height);
-        return video;
+        
+    public static HyperVideo importVideo(String name, String directory, int width, int height, String frameType, String audioType){
+        String[] img = importFrames(directory, width, height, frameType);
+        String audio = importAudio(directory, audioType);
+        return new HyperVideo(img, audio, name, width, height);
 
     }
  
-    public static String[] importFrame(String directory, int width, int height) {
-         
-        System.out.println("Obtaining Frames");
+    public static String[] importFrames(String directory, int width, int height, String fileType) {
         File folder = new File(directory);
-        File[] listOfFiles = folder.listFiles();
-        String[] rgbFiles = new String[FRAME_SIZE];
-        int i = 0;
-        for (File f : listOfFiles) {
-          if (f.isFile() && f.getName().endsWith(".rgb")) {
-              rgbFiles[i] = f.getPath();
-              i++;
-          } 
-        };
-        IMAGE_WIDTH = width;
-        IMAGE_HEIGHT = height;
+        File[] listOfFiles = folder.listFiles(new FileFilter(){
+			public boolean accept(File file) {
+				return file.getName().toLowerCase().endsWith(fileType);
+			}
+        });
+        
+        String[] rgbFiles = new String[listOfFiles.length];
+        for(int i=0; i < listOfFiles.length; i++) {
+        	rgbFiles[i] = listOfFiles[i].getPath();
+        }
+        
         Arrays.sort(rgbFiles);
-        System.out.println("Importing Frames");
         return rgbFiles;
+    }
+    
+    public static String importAudio(String directory, String fileType) {
+        File folder = new File(directory);
+        File[] listOfFiles = folder.listFiles(new FileFilter(){
+			public boolean accept(File file) {
+				return file.getName().toLowerCase().endsWith(fileType);
+			}
+        });
+        
+        String audioFile = null;
+        for(int i=0; i < listOfFiles.length; i++) {
+        	audioFile = listOfFiles[i].getPath();
+        	break;
+        }
+        
+        return audioFile;
     }
      
     public static String importName(String directory){
         String[] parts = directory.split("/");
         return parts[parts.length - 1];
     }
-    
-    public static String importAudio(String directory) {
-        String audioPath = null;
- 
-        File folder = new File(directory);
-        File[] listOfFiles = folder.listFiles();
-        for (File f : listOfFiles) {
-          if (f.isFile() && f.getName().endsWith(".wav")) {
-              audioPath = f.getPath();
-              break;
-          } 
-        };
-        return audioPath;
-    }
-     
+   
     public static void importImage(BufferedImage img, String fileName) {
-        try{
+    	try{      	
             File file = new File(fileName);
             InputStream is = new FileInputStream(file);
      
@@ -75,12 +71,12 @@ public class VideoReader {
             }
              
             int id = 0;
-            for(int y = 0 ; y < IMAGE_HEIGHT ; y++){
-                for(int x = 0 ; x < IMAGE_WIDTH ; x++){
+            for(int y = 0 ; y < img.getHeight(); y++){
+                for(int x = 0 ; x < img.getWidth(); x++){
                      
                     byte r = bytes[id];
-                    byte g = bytes[id + IMAGE_HEIGHT * IMAGE_WIDTH];
-                    byte b = bytes[id + IMAGE_HEIGHT * IMAGE_WIDTH * 2];
+                    byte g = bytes[id + img.getHeight() * img.getWidth()];
+                    byte b = bytes[id + img.getHeight() * img.getWidth() * 2];
  
                     int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
                     img.setRGB(x, y, pix);
@@ -88,7 +84,7 @@ public class VideoReader {
                 }
             }
             is.close();
-             
+            
         }catch(FileNotFoundException e) {
             e.printStackTrace();
         }catch(IOException e) {

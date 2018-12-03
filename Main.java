@@ -1,11 +1,15 @@
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
- 
+
 public class Main {
      
-    static HyperVideo[] videos;
- 
+    HyperVideo[] videos;
+    static final int IMAGE_WIDTH = 352;
+    static final int IMAGE_HEIGHT = 288;
+    static final String FRAME_TYPE = ".rgb";
+    static final String AUDIO_TYPE = "wav";
+    
     public static void main(String[] args) {
         File folder = new File("./Film");
         File[] directory = folder.listFiles(new FileFilter(){
@@ -16,14 +20,25 @@ public class Main {
         Arrays.sort(directory);
         
         HyperVideo[] videos = new HyperVideo[directory.length];
+        
         for(int i = 0 ; i < directory.length ; i++) {
-            System.out.println(directory[i].toString());
-            videos[i] = VideoReader.importVideo(directory[i].toString(), 352, 288);
-            System.out.println("Finish Importing Video  " + videos[i].getName());
+            videos[i] = VideoReader.importVideo(
+            		directory[i].getName(), 
+            		directory[i].toString(),  
+            		IMAGE_WIDTH, 
+            		IMAGE_HEIGHT, 
+            		FRAME_TYPE, 
+            		AUDIO_TYPE);
+            
+            System.out.printf("Finish Importing Video %s with %d Frames - From <%s>\n", 
+            		videos[i].getName(), 
+            		videos[i].getFrameSize(),
+            		directory[i].toString()
+            );
         }
         
-        VideoPlayer videoPlayer = new VideoPlayer(videos);
-        //new VideoEditor(videos);
+        //VideoPlayer videoPlayer = new VideoPlayer(videos);
+        new VideoEditor(videos);
     }
      
 }
