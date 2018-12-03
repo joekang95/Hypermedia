@@ -5,13 +5,13 @@ public class HyperVideo {
     private String audio;
     private String name;
      
-    HyperVideo(String directory, int width, int height){
+    HyperVideo(String[] img, String audio, String name,int width, int height){
         IMAGE_WIDTH = width;
         IMAGE_HEIGHT = height;
-        img = VideoReader.importFrame(directory, width, height);
-        audio = VideoReader.importAudio(directory);
-        String[] parts = directory.split("/");
-        name = parts[parts.length - 1];
+        this.img = img;
+        this.audio = audio;
+        //String[] parts = directory.split("/");
+        this.name = name;
     }
      
     String getName() {

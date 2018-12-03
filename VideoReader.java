@@ -4,11 +4,22 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
  
 public class VideoReader {
      
     static int FRAME_SIZE = 9000;
     static int IMAGE_WIDTH, IMAGE_HEIGHT;
+    
+    public static HyperVideo importVideo(String directory, int width, int height){
+        HyperVideo video;
+        String[] img = importFrame(directory, width, height);
+        String audio = importAudio(directory);
+        String name = importName(directory);
+        video = new HyperVideo(img, audio, name, width, height);
+        return video;
+
+    }
  
     public static String[] importFrame(String directory, int width, int height) {
          
@@ -30,7 +41,11 @@ public class VideoReader {
         return rgbFiles;
     }
      
- 
+    public static String importName(String directory){
+        String[] parts = directory.split("/");
+        return parts[parts.length - 1];
+    }
+    
     public static String importAudio(String directory) {
         String audioPath = null;
  

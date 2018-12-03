@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Arrays;
  
 public class Main {
      
@@ -12,12 +13,12 @@ public class Main {
                 return file.isDirectory();
             }
         });
-        
         Arrays.sort(directory);
         
         HyperVideo[] videos = new HyperVideo[directory.length];
         for(int i = 0 ; i < directory.length ; i++) {
-            videos[i] = new HyperVideo(directory[i].toString(), 352, 288);
+            System.out.println(directory[i].toString());
+            videos[i] = VideoReader.importVideo(directory[i].toString(), 352, 288);
             System.out.println("Finish Importing Video  " + videos[i].getName());
         }
         
