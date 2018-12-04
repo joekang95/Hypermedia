@@ -18,12 +18,12 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 	Graphics2D g2;
 	Rectangle2D square;
 	public double x1 = 0, y1 = 0;
-	public double sizeX = 60, sizeY = 60, pointSize = 10;
+	public double sizeX = 60, sizeY = 60, pointSize = 8;
 	private double x2 = x1 + sizeX, y2 = y1 + sizeY;
 	private double offsetX, offsetY;
     private int pos = -1;
     private Rectangle2D[] points = new Rectangle2D[2];
-    private String name = null;
+    public String name = null;
     
     public LayerPanel(int x1, int y1, int width, int height) {
 
@@ -44,7 +44,7 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 		this.requestFocus();
     }
 
-    public LayerPanel(int x1, int y1, int width, int height, int sizeX, int sizeY, String name) {
+    public LayerPanel(int x1, int y1, int width, int height, int sizeX, int sizeY, String name, boolean select) {
     	
     	this.sizeX = sizeX;
     	this.sizeY = sizeY;
@@ -59,7 +59,12 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 		square = new Rectangle2D.Double(x1, y1, sizeX, sizeY);
         this.setOpaque(false);
         this.setBounds(0, 5, width, height);
-		color = new Color(255, 0, 0, alpha);
+        if(select) {
+        	color = new Color(255, 0, 0, alpha);
+        }
+        else {
+    		color = new Color(130, 214, 255, alpha);
+        }
 		setFocusable(true);
 		addMouseMotionListener(this);
 		addMouseListener(this);
@@ -153,7 +158,7 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 		pos = -1;
 		dragPoint = false;
 		dragging = false;
-		color = new Color(130, 214, 255, alpha);
+		//color = new Color(130, 214, 255, alpha);
 	    repaint(); 
 	}
 	@Override
@@ -167,7 +172,7 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 	}
 	
 	@Override
-	public void mouseEntered(MouseEvent arg0) {
+	public void mouseEntered(MouseEvent e) {
 		
 	}
 	
