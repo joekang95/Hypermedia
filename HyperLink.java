@@ -1,3 +1,6 @@
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class HyperLink {
 	
 	private int x, y, width, height;
@@ -16,6 +19,14 @@ public class HyperLink {
 		this.width = width;
 		this.height = height;
 		this.name = name;
+	}
+	
+	HyperLink(JSONObject jsonLink) throws JSONException {
+		this.x = jsonLink.getInt("x");
+		this.y = jsonLink.getInt("y");
+		this.width = jsonLink.getInt("width");
+		this.height = jsonLink.getInt("height");
+		this.name = jsonLink.getString("name");
 	}
 	
 	public int getX() {
@@ -56,5 +67,15 @@ public class HyperLink {
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public JSONObject toJson() throws JSONException {
+		JSONObject obj = new JSONObject();
+		obj.put("x", x);
+		obj.put("y", y);
+		obj.put("width", width);
+		obj.put("height", height);
+		obj.put("name", name);
+		return obj;
 	}
 }

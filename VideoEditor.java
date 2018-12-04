@@ -74,13 +74,13 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         IMAGE_WIDTH = videos[leftListTracker].getWidth();
         IMAGE_HEIGHT = videos[leftListTracker].getHeight();
         GUI();
-        readImg(leftImg, videos[leftListTracker].getFrame(0).getPath());
+        readImg(leftImg, videos[leftListTracker].getFramePath(0));
     }
      
     public void updateImage(int index){
         if(index == 0) {
             leftLayer.removeAll();
-            readImg(leftImg, videos[leftListTracker].getFrame(frameCounter).getPath());
+            readImg(leftImg, videos[leftListTracker].getFramePath(frameCounter));
 
         	int j = 0;
         	ArrayList<HyperLink> links = videos[leftListTracker].getFrame(frameCounter).getLinks();
@@ -93,7 +93,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
             leftLayer.add(leftVideo, j);		
         }
         else if(index == 1) {
-            readImg(rightImg, videos[rightListTracker].getFrame(frameCounter).getPath());
+            readImg(rightImg, videos[rightListTracker].getFramePath(frameCounter));
             rightVideo.revalidate();
             rightVideo.repaint();
         }

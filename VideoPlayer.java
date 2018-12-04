@@ -44,13 +44,13 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         IMAGE_WIDTH = videos[listTracker].getWidth();
         IMAGE_HEIGHT = videos[listTracker].getHeight();
         img = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
-        readImg(videos[listTracker].getFrame(0).getPath()); 
+        readImg(videos[listTracker].getFramePath(0)); 
         GUI();
     }
      
     public void updateImage(){
         frameCounter++;
-        readImg(videos[listTracker].getFrame(frameCounter).getPath());
+        readImg(videos[listTracker].getFramePath(frameCounter));
         videoPanel.revalidate();
         videoPanel.repaint();
     }
@@ -173,7 +173,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             progressBar.setValue(0);
             videoPanel.removeAll();
             listTracker = videoList.getSelectedIndex();
-            readImg(videos[listTracker].getFrame(frameCounter).getPath());
+            readImg(videos[listTracker].getFramePath(frameCounter));
             videoPanel.add(new JLabel(new ImageIcon (img)));
             videoPanel.revalidate();
             videoPanel.repaint();   
@@ -192,7 +192,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
                             //sound.stopMusic();
                             progressTime.setText("0:00/5:00");
                             progressBar.setValue(0);
-                            readImg(videos[listTracker].getFrame(0).getPath());
+                            readImg(videos[listTracker].getFramePath(0));
                             videoPanel.revalidate();
                             videoPanel.repaint();
                             playing = false;
@@ -213,7 +213,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
                 }); 
                 
                 timer.start(); 
-                sound = new PlayWaveFile(videos[listTracker].getAudio(), resume, frameCounter); 
+                sound = new PlayWaveFile(videos[listTracker].getAudioPath(), resume, frameCounter); 
                 sound.start();
                 playing = true;
             }
@@ -230,7 +230,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             playing = false;
             resume = false;
             sound.stopMusic();
-            readImg(videos[listTracker].getFrame(0).getPath());
+            readImg(videos[listTracker].getFramePath(0));
             videoPanel.revalidate();
             videoPanel.repaint();
             progressBar.setValue(0);
@@ -255,7 +255,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         resume = true;
         if(playing) {
         	sound.stopMusic();
-            sound = new PlayWaveFile(videos[listTracker].getAudio(), resume, frameCounter);
+        	System.out.println(videos[listTracker].getAudioPath());
+            sound = new PlayWaveFile(videos[listTracker].getAudioPath(), resume, frameCounter);
             sound.start();
         }
     }
