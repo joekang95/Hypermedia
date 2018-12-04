@@ -1,57 +1,85 @@
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
  
 public class VideoReader {
         
     public static HyperVideo importVideo(String name, String directory, int width, int height, String frameType, String audioType){
-    	ArrayList<HyperFrame> frames = importFrames(directory, width, height, frameType);
-        String audio = importAudio(directory, audioType);
-        return new HyperVideo(frames, audio, name, width, height);
-
+    	ArrayList<HyperFrame> frames = null;
+    	String audio = null;
+    	try {
+    		JSONObject metaJson = importMetaData(directory);
+    		JSONArray jsonFrames = metaJson.getJSONArray("frames");
+    		frames = importFrames(jsonFrames);
+    		audio = metaJson.getString("audio");
+    	}
+    	catch (JSONException | FileNotFoundException e){
+    		System.out.printf("Initial %s metadata\n", name);
+    		frames = importFrames(directory, frameType);
+    		audio = importAudio(directory, audioType);
+    	}	
+        return new HyperVideo(directory, frames, audio, name, width, height);
     }
  
-    public static ArrayList<HyperFrame> importFrames(String directory, int width, int height, String fileType) {
+    public static JSONObject importMetaData(String directory) throws FileNotFoundException, JSONException{
+    	String metaDataPath = directory + "/" + "metadata.json";
+    	JSONObject metaJson = new JSONObject(new JSONTokener(new BufferedReader(new FileReader(metaDataPath))));
+		return metaJson;
+    }
+   
+    public static ArrayList<HyperFrame> importFrames(JSONArray jsonFrames) throws JSONException{
+    	ArrayList<HyperFrame> frames = new ArrayList<HyperFrame>();
+    	for(int i=0; i<jsonFrames.length(); i++) {
+			JSONObject jsonFrame = jsonFrames.getJSONObject(i);
+			String path = jsonFrame.getString("path");
+			frames.add(new HyperFrame(jsonFrame));
+		}
+    	return frames;
+    }
+    
+    public static ArrayList<HyperFrame> importFrames(String directory, String fileType) {
         File folder = new File(directory);
-        File[] listOfFiles = folder.listFiles(new FileFilter(){
-			public boolean accept(File file) {
-				return file.getName().toLowerCase().endsWith(fileType);
+        String[] frameNames = folder.list(new FilenameFilter() {
+        	public boolean accept(File file, String name) {
+				return name.toLowerCase().endsWith(fileType);
 			}
         });
+        Arrays.sort(frameNames);
         
-        String[] framePaths = new String[listOfFiles.length];
-        for(int i = 0; i < listOfFiles.length;i++) {
-        	framePaths[i] = listOfFiles[i].getPath();	        
-        }
-        Arrays.sort(framePaths);
-       
         ArrayList<HyperFrame> frames = new ArrayList<HyperFrame>();
-        for(String framePath: framePaths) {
-        	frames.add(new HyperFrame(framePath));
+        for(String frameName: frameNames) {
+        	frames.add(new HyperFrame(frameName));
         }
         return frames;
     }
     
     public static String importAudio(String directory, String fileType) {
         File folder = new File(directory);
-        File[] listOfFiles = folder.listFiles(new FileFilter(){
-			public boolean accept(File file) {
-				return file.getName().toLowerCase().endsWith(fileType);
+        String[] audioNames = folder.list(new FilenameFilter() {
+        	public boolean accept(File file, String name) {
+				return name.toLowerCase().endsWith(fileType);
 			}
         });
+        Arrays.sort(audioNames);
         
         String audioFile = null;
-        for(int i = 0 ; i < listOfFiles.length ; i++) {
-        	audioFile = listOfFiles[i].getPath();
+        for(String audioName: audioNames) {
+        	audioFile = audioName;
         	break;
         }
-        
         return audioFile;
     }
      

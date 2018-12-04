@@ -24,7 +24,7 @@ public class Main {
         for(int i = 0 ; i < directory.length ; i++) {
             videos[i] = VideoReader.importVideo(
             		directory[i].getName(), 
-            		directory[i].toString(),  
+            		directory[i].getPath(),  
             		IMAGE_WIDTH, 
             		IMAGE_HEIGHT, 
             		FRAME_TYPE, 

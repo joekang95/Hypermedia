@@ -1,5 +1,9 @@
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class HyperFrame {
 
 	private String path;
@@ -10,11 +14,21 @@ public class HyperFrame {
 		links = new ArrayList<HyperLink>();
 	}
 	
-	public String getPath() {
+	HyperFrame(JSONObject jsonFrame) throws JSONException {
+		this.path = jsonFrame.getString("path");
+		this.links = new ArrayList<HyperLink>();
+		JSONArray jsonLinks = jsonFrame.getJSONArray("links");
+		for(int i=0; i<jsonLinks.length(); i++) {
+			JSONObject jsonLink = jsonLinks.optJSONObject(i);
+			links.add(new HyperLink(jsonLink));
+		}
+	}
+	
+	public String getName() {
 		return path;
 	}
 	
-	public void setPath(String imagePath) {
+	public void setName(String imagePath) {
 		this.path = imagePath;
 	}
 	
@@ -32,6 +46,19 @@ public class HyperFrame {
 	
 	public void removeLink(HyperLink link) {
 		links.remove(link);
+	}
+	
+	public JSONObject toJson() throws JSONException {
+		JSONObject obj = new JSONObject();
+		obj.put("path", path);
+		
+		JSONArray jsonLinks = new JSONArray();
+		for(HyperLink link : links) {
+			jsonLinks.put(link.toJson());
+		}
+		
+		obj.put("links", jsonLinks);
+		return obj;
 	}
 	
 }

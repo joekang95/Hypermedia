@@ -77,26 +77,27 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         IMAGE_WIDTH = videos[leftListTracker].getWidth();
         IMAGE_HEIGHT = videos[leftListTracker].getHeight();
         GUI();
-        readImg(leftImg, videos[leftListTracker].getFrame(0).getPath());
+        readImg(leftImg, videos[leftListTracker].getFramePath(0));
     }
      
     public void updateImage(int index){
         if(index == 0) {
             leftLayer.removeAll();
-            readImg(leftImg, videos[leftListTracker].getFrame(frameCounter).getPath());
-            
-        	int layer = 0;
-        	links = videos[leftListTracker].getFrame(frameCounter).getLinks();
-    		System.out.println(links.size());
-        	for(HyperLink l : links){
-        		leftLayer.add(new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
-        		layer++;
+
+            readImg(leftImg, videos[leftListTracker].getFramePath(frameCounter));
+
+			int layer = 0;
+			links = videos[leftListTracker].getFrame(frameCounter).getLinks();
+			System.out.println(links.size());
+			for(HyperLink l : links){
+				leftLayer.add(new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
+				layer++;
         	}
         	
             leftLayer.add(leftVideo, layer);		
         }
         else if(index == 1) {
-            readImg(rightImg, videos[rightListTracker].getFrame(frameCounter).getPath());
+            readImg(rightImg, videos[rightListTracker].getFramePath(frameCounter));
             rightVideo.revalidate();
             rightVideo.repaint();
         }
