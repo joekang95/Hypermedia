@@ -23,6 +23,7 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 	private double offsetX, offsetY;
     private int pos = -1;
     private Rectangle2D[] points = new Rectangle2D[2];
+    private String name = null;
     
     public LayerPanel(int x1, int y1, int width, int height) {
 
@@ -43,12 +44,13 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 		this.requestFocus();
     }
 
-    public LayerPanel(int x1, int y1, int width, int height, int sizeX, int sizeY) {
+    public LayerPanel(int x1, int y1, int width, int height, int sizeX, int sizeY, String name) {
     	
     	this.sizeX = sizeX;
     	this.sizeY = sizeY;
 		this.x1 = x1;
 		this.y1 = y1;
+		this.name = name;
 		x2 = x1 + sizeX;
 		y2 = y1 + sizeY;
 		
