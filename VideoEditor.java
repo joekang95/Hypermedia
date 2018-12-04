@@ -5,6 +5,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -33,7 +35,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
  
-public class VideoEditor implements ListSelectionListener, ActionListener, MouseListener, ChangeListener {
+public class VideoEditor implements ListSelectionListener, ActionListener, MouseListener, ChangeListener, ItemListener {
      
     static int IMAGE_WIDTH = 352;
     static int IMAGE_HEIGHT = 288;
@@ -41,9 +43,10 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     static BufferedImage rightImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
     private int frameCounter = 0, leftListTracker = 0, rightListTracker = -1;
+    private boolean creating = false;
     JFrame frame = new JFrame("HyperVideo Linking Tool");
     JPanel panel = new JPanel();
-    private static JPanel leftVideo = new JPanel();
+    JPanel leftVideo = new JPanel();
     JPanel rightVideo = new JPanel();
     JPanel buttons = new JPanel();
     JButton create = new JButton("Create Link");
@@ -66,8 +69,8 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     DefaultComboBoxModel<String> comboModel;
      
     HyperVideo[] videos;
-//    LayerPanel[][] layers = new LayerPanel[9000][100];
-//    int[] layerCounter = new int[9000];
+    LayerPanel newLayer = null;
+    ArrayList<HyperLink> links;
     
     VideoEditor(HyperVideo[] videos){
         this.videos = videos; 
@@ -81,16 +84,16 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         if(index == 0) {
             leftLayer.removeAll();
             readImg(leftImg, videos[leftListTracker].getFrame(frameCounter).getPath());
-
-        	int j = 0;
-        	ArrayList<HyperLink> links = videos[leftListTracker].getFrame(frameCounter).getLinks();
-        	
-        	for(HyperLink link : links){
-        		leftLayer.add(new LayerPanel(link.getX(), link.getY(), link.getWidth(), link.getHeight()), j);
-		        j++;
+            
+        	int layer = 0;
+        	links = videos[leftListTracker].getFrame(frameCounter).getLinks();
+    		System.out.println(links.size());
+        	for(HyperLink l : links){
+        		leftLayer.add(new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
+        		layer++;
         	}
         	
-            leftLayer.add(leftVideo, j);		
+            leftLayer.add(leftVideo, layer);		
         }
         else if(index == 1) {
             readImg(rightImg, videos[rightListTracker].getFrame(frameCounter).getPath());
@@ -125,10 +128,15 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         JScrollPane rightListScrollPane = new JScrollPane(rightVideoList);
         rightListScrollPane.setPreferredSize(new Dimension(130, 280));
 
+    	links = videos[leftListTracker].getFrame(frameCounter).getLinks();
+    	for(HyperLink l : links){
+    		comboModel.addElement(l.getName());
+    	}
         comboModel = new DefaultComboBoxModel<String>();
         hyperLinkList = new JComboBox<String>(comboModel);
         hyperLinkList.setEditable(false);
         hyperLinkList.setEnabled(false);
+        hyperLinkList.addItemListener(this);
          
         create.addActionListener(this);
         connect.addActionListener(this);
@@ -288,7 +296,8 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
             	leftSlider.setValue(0);
                 leftProgressTime.setText("Frame 0001");
                 leftListTracker = leftVideoList.getSelectedIndex();
-                updateImage(0); 
+                updateImage(0);
+                creating = false; 
             }
             if(e.getSource() == rightVideoList) {
             	rightSlider.setValue(0);
@@ -303,45 +312,63 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == create) {
-        	ArrayList<HyperLink> links = videos[leftListTracker].getFrame(frameCounter).getLinks();
-        	
-	        if(hyperLinkList.getItemCount() == 0){
-	        	hyperLinkList.setEditable(true);
-	        	hyperLinkList.setEnabled(true);
-	        }
-        	leftLayer.removeAll();
-		    LayerPanel newLayer = new LayerPanel(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
-		    int i = 0;
-		    leftLayer.add(newLayer, i);
-		    for(HyperLink link : links){
-		    	i++;
-        		leftLayer.add(new LayerPanel(link.getX(), link.getY(), link.getWidth(), link.getHeight()), i);
-        	}	
-		    leftLayer.add(leftVideo, i + 1);	
+        	if(!creating){
+		        if(hyperLinkList.getItemCount() == 0){
+		        	hyperLinkList.setEditable(true);
+		        	hyperLinkList.setEnabled(true);
+		        }
+	        	leftLayer.removeAll();
+			    newLayer = new LayerPanel(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+			    int layer = 0;
+			    leftLayer.add(newLayer, layer);
+			    for(HyperLink l : links){
+			    	layer++;
+	        		leftLayer.add(new LayerPanel(l.getX(), l.getY(), l.getWidth(), l.getHeight()), layer);
+	        	}	
+			    leftLayer.add(leftVideo, layer + 1);	
+			    creating = true;
+        	}
         }
         if(e.getSource() == cancel) {
-//        	int counter = layerCounter[frameCounter];
-//        	leftLayer.remove(leftLayer.getIndexOf(layers[frameCounter][counter - 1]));
-//        	leftLayer.revalidate();
-//        	leftLayer.repaint();	
-//        	layerCounter[frameCounter]--;
+        	if(creating){
+        		leftLayer.remove(leftLayer.getIndexOf(newLayer));
+        		leftLayer.revalidate();
+        		leftLayer.repaint();
+        		creating = false;
+        	}
         }
         if(e.getSource() == connect) {
         }
         if(e.getSource() == save) {
         	String input = hyperLinkList.getEditor().getItem().toString();
         	if(comboModel.getIndexOf(input) == -1){
-        		hyperLinkList.addItem(input);
-        		hyperLinkList.getEditor().setItem("");
+        		if(input.matches("(\\w|\\d)+")){
+	        		hyperLinkList.addItem(input);
+	        		hyperLinkList.getEditor().setItem("");
+	        		HyperLink newLink = new HyperLink((int)newLayer.x1, (int)newLayer.y1, (int)newLayer.sizeX, (int)newLayer.sizeY);
+	        		links.add(newLink);
+	        		//videos[leftListTracker].getFrame(frameCounter).addLink(newLink);
+	        		creating = false;
+	        		buttons.revalidate();
+	        		buttons.repaint();
+        		}
+        		else{
+	        		hyperLinkList.getEditor().setItem("");
+            		JOptionPane.showMessageDialog(frame, "Name Can Only Include Alphabets and Numbers");
+        		}
         	}
         	else{
+        		hyperLinkList.getEditor().setItem("");
         		JOptionPane.showMessageDialog(frame, "Name Already Exists!");
         	}
         	
         }
         if(e.getSource() == delete) {
-        	hyperLinkList.removeItem(hyperLinkList.getSelectedItem());
+//    		HyperLink newLink = links.getLink(hyperLinkList.getSelectedItem());
+//    		links.remove(newLink);
     		hyperLinkList.getEditor().setItem("");
+    		buttons.revalidate();
+    		buttons.repaint();
         }
          
     }
@@ -365,6 +392,38 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
             updateImage(1);
         }
     }
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if(e.getSource() == leftSlider) {
+            creating = false;
+			int sliderVal = leftSlider.getValue();
+            if(sliderVal < 9000) {
+                leftProgressTime.setText("Frame " + String.format("%04d", sliderVal + 1));
+            	frameCounter = sliderVal;  
+            	updateImage(0); 
+            }
+            if(sliderVal == 9000) {
+                leftProgressTime.setText("Frame " + String.format("%04d", sliderVal));
+            }
+		}
+		if(e.getSource() == rightSlider) {
+			int sliderVal = rightSlider.getValue();
+            if(sliderVal < 9000) {
+                rightProgressTime.setText("Frame " + String.format("%04d", sliderVal + 1));
+            	frameCounter = sliderVal;  
+            	updateImage(1); 
+            }
+            if(sliderVal == 9000) {
+            	rightProgressTime.setText("Frame " + String.format("%04d", sliderVal));   	
+            }
+		}
+	}
+	
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+//		leftLayer.moveToFront(e.getItem());
+	}
  
     @Override
     public void mouseEntered(MouseEvent e) {
@@ -387,32 +446,4 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
          
     }
 
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		if(e.getSource() == leftSlider) {
-			int sliderVal = leftSlider.getValue();
-            if(sliderVal < 9000) {
-                leftProgressTime.setText("Frame " + String.format("%04d", sliderVal + 1));
-            	frameCounter = sliderVal;  
-            	updateImage(0); 
-            }
-            if(sliderVal == 9000) {
-                leftProgressTime.setText("Frame " + String.format("%04d", sliderVal));
-            	
-            }
-		}
-		if(e.getSource() == rightSlider) {
-			int sliderVal = rightSlider.getValue();
-            if(sliderVal < 9000) {
-                rightProgressTime.setText("Frame " + String.format("%04d", sliderVal + 1));
-            	frameCounter = sliderVal;  
-            	updateImage(1); 
-            }
-            if(sliderVal == 9000) {
-            	rightProgressTime.setText("Frame " + String.format("%04d", sliderVal));
-            	
-            }
-		}
-		
-	}
 }

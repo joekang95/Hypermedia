@@ -17,23 +17,43 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 	private boolean dragging = false, dragPoint = false;
 	Graphics2D g2;
 	Rectangle2D square;
-	double x1 = 0, y1 = 0;
-	double sizeX = 60, sizeY = 60, pointSize = 10;
-	double x2 = x1 + sizeX, y2 = y1 + sizeY;
-	double offsetX, offsetY;
+	public double x1 = 0, y1 = 0;
+	public double sizeX = 60, sizeY = 60, pointSize = 10;
+	private double x2 = x1 + sizeX, y2 = y1 + sizeY;
+	private double offsetX, offsetY;
     private int pos = -1;
-    private Rectangle2D[] points = {
-    		new Rectangle2D.Double(x1 - pointSize/2, y1 - pointSize/2, pointSize, pointSize), 
-    		new Rectangle2D.Double(x2 - pointSize/2, y2 - pointSize/2, pointSize, pointSize)
-    		};
+    private Rectangle2D[] points = new Rectangle2D[2];
+    
+    public LayerPanel(int x1, int y1, int width, int height) {
 
-    public LayerPanel(int x, int y, int width, int height) {
-
-		x1 = x;
-		y1 = y;
+		this.x1 = x1;
+		this.y1 = y1;
 		x2 = x1 + sizeX;
 		y2 = y1 + sizeY;
 		
+		points[0] = new Rectangle2D.Double(x1 - pointSize/2, y1 - pointSize/2, pointSize, pointSize);
+		points[1] = new Rectangle2D.Double(x2 - pointSize/2, y2 - pointSize/2, pointSize, pointSize);
+		square = new Rectangle2D.Double(x1, y1, sizeX, sizeY);
+        this.setOpaque(false);
+        this.setBounds(0, 5, width, height);
+		color = new Color(255, 0, 0, alpha);
+		setFocusable(true);
+		addMouseMotionListener(this);
+		addMouseListener(this);
+		this.requestFocus();
+    }
+
+    public LayerPanel(int x1, int y1, int width, int height, int sizeX, int sizeY) {
+    	
+    	this.sizeX = sizeX;
+    	this.sizeY = sizeY;
+		this.x1 = x1;
+		this.y1 = y1;
+		x2 = x1 + sizeX;
+		y2 = y1 + sizeY;
+		
+		points[0] = new Rectangle2D.Double(x1 - pointSize/2, y1 - pointSize/2, pointSize, pointSize);
+		points[1] = new Rectangle2D.Double(x2 - pointSize/2, y2 - pointSize/2, pointSize, pointSize);
 		square = new Rectangle2D.Double(x1, y1, sizeX, sizeY);
         this.setOpaque(false);
         this.setBounds(0, 5, width, height);
