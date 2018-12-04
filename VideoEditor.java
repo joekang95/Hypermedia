@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -65,8 +66,8 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     DefaultComboBoxModel<String> comboModel;
      
     HyperVideo[] videos;
-    LayerPanel[][] layers = new LayerPanel[9000][100];
-    int[] layerCounter = new int[9000];
+//    LayerPanel[][] layers = new LayerPanel[9000][100];
+//    int[] layerCounter = new int[9000];
     
     VideoEditor(HyperVideo[] videos){
         this.videos = videos; 
@@ -80,14 +81,15 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         if(index == 0) {
             leftLayer.removeAll();
             readImg(leftImg, videos[leftListTracker].getFrame(frameCounter).getPath());
-        	int counter = layerCounter[frameCounter];
+
         	int j = 0;
-            if(layers[frameCounter][0] != null) {
-            	for(int i = counter; i > 0 ; i--) {
-			        leftLayer.add(layers[frameCounter][i - 1], j);
-			        j++;
-		        }	
-            }
+        	ArrayList<HyperLink> links = videos[leftListTracker].getFrame(frameCounter).getLinks();
+        	
+        	for(HyperLink link : links){
+        		leftLayer.add(new LayerPanel(link.getX(), link.getY(), link.getWidth(), link.getHeight()), j);
+		        j++;
+        	}
+        	
             leftLayer.add(leftVideo, j);		
         }
         else if(index == 1) {
@@ -301,37 +303,28 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == create) {
-        	int counter = layerCounter[frameCounter];
+        	ArrayList<HyperLink> links = videos[leftListTracker].getFrame(frameCounter).getLinks();
+        	
 	        if(hyperLinkList.getItemCount() == 0){
 	        	hyperLinkList.setEditable(true);
 	        	hyperLinkList.setEnabled(true);
 	        }
-        	if(counter == 0) {
-		        leftLayer.removeAll();
-		        LayerPanel newLayer = new LayerPanel(IMAGE_WIDTH, IMAGE_HEIGHT);
-		        leftLayer.add(newLayer, 0);	
-		        leftLayer.add(leftVideo, 1);	
-		        layers[frameCounter][counter] = newLayer;
-		        layerCounter[frameCounter] = 1;
-        	}
-        	else if(counter > 0){
-		        leftLayer.removeAll();
-		        LayerPanel newLayer = new LayerPanel(IMAGE_WIDTH, IMAGE_HEIGHT);
-		        leftLayer.add(newLayer, 0);
-		        for(int i = 1 ; i <= counter ; i++) {
-			        leftLayer.add(layers[frameCounter][i - 1], i);	
-		        }	
-		        leftLayer.add(leftVideo, counter + 1);	
-		        layers[frameCounter][counter] = newLayer;
-		        layerCounter[frameCounter]++;	
-        	}
+        	leftLayer.removeAll();
+		    LayerPanel newLayer = new LayerPanel(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+		    int i = 0;
+		    leftLayer.add(newLayer, i);
+		    for(HyperLink link : links){
+		    	i++;
+        		leftLayer.add(new LayerPanel(link.getX(), link.getY(), link.getWidth(), link.getHeight()), i);
+        	}	
+		    leftLayer.add(leftVideo, i + 1);	
         }
         if(e.getSource() == cancel) {
-        	int counter = layerCounter[frameCounter];
-        	leftLayer.remove(leftLayer.getIndexOf(layers[frameCounter][counter - 1]));
-        	leftLayer.revalidate();
-        	leftLayer.repaint();	
-        	layerCounter[frameCounter]--;
+//        	int counter = layerCounter[frameCounter];
+//        	leftLayer.remove(leftLayer.getIndexOf(layers[frameCounter][counter - 1]));
+//        	leftLayer.revalidate();
+//        	leftLayer.repaint();	
+//        	layerCounter[frameCounter]--;
         }
         if(e.getSource() == connect) {
         }
