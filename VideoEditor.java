@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,6 +21,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -59,6 +62,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     JMenu menu = new JMenu("Menu");
     JMenuItem player = new JMenuItem("Open Video Player");
     JLayeredPane leftLayer = new JLayeredPane();
+    DefaultComboBoxModel comboModel;
      
     HyperVideo[] videos;
     LayerPanel[][] layers = new LayerPanel[9000][100];
@@ -118,8 +122,9 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         rightVideoList.addListSelectionListener(this);
         JScrollPane rightListScrollPane = new JScrollPane(rightVideoList);
         rightListScrollPane.setPreferredSize(new Dimension(130, 280));
-        
-        hyperLinkList = new JComboBox<String>();
+
+        comboModel = new DefaultComboBoxModel();
+        hyperLinkList = new JComboBox<String>(comboModel);
         hyperLinkList.setEditable(false);
         hyperLinkList.setEnabled(false);
          
@@ -207,15 +212,15 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
  
         b.gridx = 0;
         b.gridy = 3;
-        buttons.add(save, b);
+        buttons.add(hyperLinkList, b);
  
         b.gridx = 0;
         b.gridy = 4;
-        buttons.add(delete, b);
+        buttons.add(save, b);
  
         b.gridx = 0;
         b.gridy = 5;
-        buttons.add(hyperLinkList, b);
+        buttons.add(delete, b);
  
         c.gridx = 4;
         c.gridy = 0;
@@ -296,6 +301,10 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == create) {
         	int counter = layerCounter[frameCounter];
+	        if(hyperLinkList.getItemCount() == 0){
+	        	hyperLinkList.setEditable(true);
+	        	hyperLinkList.setEnabled(true);
+	        }
         	if(counter == 0) {
 		        leftLayer.removeAll();
 		        LayerPanel newLayer = new LayerPanel(IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -326,6 +335,17 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         if(e.getSource() == connect) {
         }
         if(e.getSource() == save) {
+        	String input = hyperLinkList.getEditor().getItem().toString();
+        	if(comboModel.getIndexOf(input) == -1){
+        		hyperLinkList.addItem(input);
+        	}
+        	else{
+        		JOptionPane.showMessageDialog(frame, "Name Already Exists!");
+        	}
+        	
+        }
+        if(e.getSource() == delete) {
+        	hyperLinkList.removeItemAt(hyperLinkList.getSelectedIndex());
         }
          
     }
