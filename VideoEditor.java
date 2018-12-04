@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,6 +21,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -59,6 +62,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     JMenu menu = new JMenu("Menu");
     JMenuItem player = new JMenuItem("Open Video Player");
     JLayeredPane leftLayer = new JLayeredPane();
+    DefaultComboBoxModel<String> comboModel;
      
     HyperVideo[] videos;
     LayerPanel[][] layers = new LayerPanel[9000][100];
@@ -118,8 +122,9 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         rightVideoList.addListSelectionListener(this);
         JScrollPane rightListScrollPane = new JScrollPane(rightVideoList);
         rightListScrollPane.setPreferredSize(new Dimension(130, 280));
-        
-        hyperLinkList = new JComboBox<String>();
+
+        comboModel = new DefaultComboBoxModel<String>();
+        hyperLinkList = new JComboBox<String>(comboModel);
         hyperLinkList.setEditable(false);
         hyperLinkList.setEnabled(false);
          
@@ -194,6 +199,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         b.anchor = GridBagConstraints.CENTER;
         b.gridx = 0;
         b.gridy = 0;
+        b.weightx = 0.4;
         b.insets = new Insets(0,6,15,6);  // padding
         buttons.add(create, b);
  
@@ -207,15 +213,15 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
  
         b.gridx = 0;
         b.gridy = 3;
-        buttons.add(save, b);
+        buttons.add(hyperLinkList, b);
  
         b.gridx = 0;
         b.gridy = 4;
-        buttons.add(delete, b);
+        buttons.add(save, b);
  
         b.gridx = 0;
         b.gridy = 5;
-        buttons.add(hyperLinkList, b);
+        buttons.add(delete, b);
  
         c.gridx = 4;
         c.gridy = 0;
@@ -261,11 +267,11 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         c.gridy = 3;
         //c.insets = new Insets(0,8,10,6);  //padding
         panel.add(rightProgressTime, c);
-     
+        
         frame.getContentPane().add(panel);
         frame.pack();           
         frame.setJMenuBar(menuBar); 
-        frame.setSize(1150, 430);
+        frame.setSize(1200, 430);
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
@@ -296,6 +302,10 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == create) {
         	int counter = layerCounter[frameCounter];
+	        if(hyperLinkList.getItemCount() == 0){
+	        	hyperLinkList.setEditable(true);
+	        	hyperLinkList.setEnabled(true);
+	        }
         	if(counter == 0) {
 		        leftLayer.removeAll();
 		        LayerPanel newLayer = new LayerPanel(IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -326,6 +336,19 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         if(e.getSource() == connect) {
         }
         if(e.getSource() == save) {
+        	String input = hyperLinkList.getEditor().getItem().toString();
+        	if(comboModel.getIndexOf(input) == -1){
+        		hyperLinkList.addItem(input);
+        		hyperLinkList.getEditor().setItem("");
+        	}
+        	else{
+        		JOptionPane.showMessageDialog(frame, "Name Already Exists!");
+        	}
+        	
+        }
+        if(e.getSource() == delete) {
+        	hyperLinkList.removeItem(hyperLinkList.getSelectedItem());
+    		hyperLinkList.getEditor().setItem("");
         }
          
     }
