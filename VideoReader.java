@@ -27,7 +27,7 @@ public class VideoReader {
     		audio = metaJson.getString("audio");
     	}
     	catch (JSONException | FileNotFoundException e){
-    		System.out.printf("Initial %s metadata\n", name);
+    		System.out.printf("Initial %s metadata %s\n", name, e);
     		frames = importFrames(directory, frameType);
     		audio = importAudio(directory, audioType);
     	}	

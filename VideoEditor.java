@@ -10,6 +10,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultComboBoxModel;
@@ -34,6 +35,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import org.json.JSONException;
  
 public class VideoEditor implements ListSelectionListener, ActionListener, MouseListener, ChangeListener, ItemListener {
      
@@ -78,6 +81,13 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         IMAGE_HEIGHT = videos[leftListTracker].getHeight();
         GUI();
         readImg(leftImg, videos[leftListTracker].getFramePath(0));
+		int layer = 0;
+		links = videos[leftListTracker].getFrame(frameCounter).getLinks();
+		for(HyperLink l : links){
+			leftLayer.add(new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
+			layer++;
+    	}
+        leftLayer.add(leftVideo, layer);
     }
      
     public void updateImage(int index){
@@ -88,7 +98,6 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 
 			int layer = 0;
 			links = videos[leftListTracker].getFrame(frameCounter).getLinks();
-			System.out.println(links.size());
 			for(HyperLink l : links){
 				leftLayer.add(new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
 				layer++;
@@ -130,13 +139,16 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         rightListScrollPane.setPreferredSize(new Dimension(130, 280));
 
     	links = videos[leftListTracker].getFrame(frameCounter).getLinks();
-    	for(HyperLink l : links){
-    		comboModel.addElement(l.getName());
-    	}
+
         comboModel = new DefaultComboBoxModel<String>();
+    	for(HyperLink link : links){
+    		comboModel.addElement(link.getName());
+    	}
         hyperLinkList = new JComboBox<String>(comboModel);
         hyperLinkList.setEditable(false);
-        hyperLinkList.setEnabled(false);
+        if(hyperLinkList.getItemCount() == 0){
+        	hyperLinkList.setEnabled(false);
+        }
         hyperLinkList.addItemListener(this);
          
         create.addActionListener(this);
@@ -346,12 +358,21 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         		if(input.matches("(\\w|\\d)+")){
 	        		hyperLinkList.addItem(input);
 	        		hyperLinkList.getEditor().setItem("");
-	        		HyperLink newLink = new HyperLink((int)newLayer.x1, (int)newLayer.y1, (int)newLayer.sizeX, (int)newLayer.sizeY);
-	        		links.add(newLink);
-	        		//videos[leftListTracker].getFrame(frameCounter).addLink(newLink);
+	        		HyperLink newLink = new HyperLink((int)newLayer.x1, (int)newLayer.y1, (int)newLayer.sizeX, (int)newLayer.sizeY, input);
+	        		//links.add(newLink);
+	        		videos[leftListTracker].getFrame(frameCounter).addLink(newLink);
 	        		creating = false;
 	        		buttons.revalidate();
 	        		buttons.repaint();
+	        		try {
+						videos[leftListTracker].saveMetaData();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (JSONException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
         		}
         		else{
 	        		hyperLinkList.getEditor().setItem("");
