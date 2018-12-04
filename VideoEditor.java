@@ -77,12 +77,14 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
             leftLayer.removeAll();
             readImg(leftImg, videos[leftListTracker].getFrame(frameCounter));
         	int counter = layerCounter[frameCounter];
+        	int j = 0;
             if(layers[frameCounter][0] != null) {
-            	for(int i = 1 ; i <= counter ; i++) {
-			        leftLayer.add(layers[frameCounter][i - 1], i - 1);	
+            	for(int i = counter; i > 0 ; i--) {
+			        leftLayer.add(layers[frameCounter][i - 1], j);
+			        j++;
 		        }	
             }
-            leftLayer.add(leftVideo, counter);		
+            leftLayer.add(leftVideo, j);		
         }
         else if(index == 1) {
             readImg(rightImg, videos[rightListTracker].getFrame(frameCounter));
