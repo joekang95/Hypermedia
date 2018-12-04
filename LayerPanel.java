@@ -65,23 +65,45 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
 		    x2 = x1 + sizeX;
 		    y2 = y1 + sizeY;
 			color = new Color(255, 0, 0, alpha);
-		    points[0] = new Rectangle2D.Double(x1 - pointSize/2, y1 - pointSize/2, pointSize, pointSize);
-		    points[1] = new Rectangle2D.Double(x2 - pointSize/2, y2 - pointSize/2, pointSize, pointSize);
+			points[0] = new Rectangle2D.Double(x1 - pointSize/2, y1 - pointSize/2, pointSize, pointSize);
+			points[1] = new Rectangle2D.Double(x2 - pointSize/2, y2 - pointSize/2, pointSize, pointSize);
 	        square.setRect(points[0].getCenterX(), points[0].getCenterY(),
 	                Math.abs(points[1].getCenterX() - points[0].getCenterX()),
 	                Math.abs(points[1].getCenterY() - points[0].getCenterY()));
 		    repaint(); 	
 	    }
 		else if(dragPoint) {
+			Point p = e.getPoint();
 		    if (pos == -1) {
                 return;
             }
-            points[pos].setRect(e.getPoint().x, e.getPoint().y, points[pos].getWidth(), points[pos].getHeight());	
-	        square.setRect(points[0].getCenterX(), points[0].getCenterY(),
-	                Math.abs(points[1].getCenterX() - points[0].getCenterX()),
-	                Math.abs(points[1].getCenterY() - points[0].getCenterY()));
-	        sizeX = Math.abs(points[1].getCenterX() - points[0].getCenterX());
-	        sizeY = Math.abs(points[1].getCenterY() - points[0].getCenterY());
+            points[pos].setRect(p.x, p.y, pointSize, pointSize);
+            if(pos == 0){
+			    if(points[0].getMaxX() > points[1].getMaxX()){
+			    	points[0].setRect(points[1].getX(), points[0].getY(), pointSize, pointSize);
+			    }
+			    if(points[0].getMaxY() > points[1].getMaxY()){
+			    	points[0].setRect(points[0].getX(), points[1].getY(), pointSize, pointSize);
+			    }
+            }
+            else{
+			    if(points[1].getMinX() < points[0].getMinX()){
+			    	points[1].setRect(points[0].getX(), points[1].getY(), pointSize, pointSize);
+			    }
+			    if(points[1].getMinY() < points[0].getMinY()){
+			    	points[1].setRect(points[1].getX(), points[0].getY(), pointSize, pointSize);
+			    }
+            }
+
+		    x1 = points[0].getCenterX();
+		    y1 = points[0].getCenterY();
+		    x2 = points[1].getCenterX();
+		    y2 = points[1].getCenterY();
+	        sizeX = Math.abs(x2 - x1);
+	        sizeY = Math.abs(y2 - y1);
+	        offsetX = 0;
+	        offsetY = 0;
+	        square.setRect(x1, y1, sizeX,sizeY);
             repaint(); 	
 		}
 	}
@@ -95,7 +117,6 @@ public class LayerPanel extends JPanel implements MouseListener, MouseMotionList
             if (points[i].contains(p)) {
         		dragPoint = true;
                 pos = i;
-                return;
             }
         }
 		if(square.contains(p) && !dragPoint){
