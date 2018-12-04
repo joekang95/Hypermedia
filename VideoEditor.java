@@ -62,7 +62,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     JMenu menu = new JMenu("Menu");
     JMenuItem player = new JMenuItem("Open Video Player");
     JLayeredPane leftLayer = new JLayeredPane();
-    DefaultComboBoxModel comboModel;
+    DefaultComboBoxModel<String> comboModel;
      
     HyperVideo[] videos;
     LayerPanel[][] layers = new LayerPanel[9000][100];
@@ -73,13 +73,13 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         IMAGE_WIDTH = videos[leftListTracker].getWidth();
         IMAGE_HEIGHT = videos[leftListTracker].getHeight();
         GUI();
-        readImg(leftImg, videos[leftListTracker].getFrame(0));
+        readImg(leftImg, videos[leftListTracker].getFrame(0).getPath());
     }
      
     public void updateImage(int index){
         if(index == 0) {
             leftLayer.removeAll();
-            readImg(leftImg, videos[leftListTracker].getFrame(frameCounter));
+            readImg(leftImg, videos[leftListTracker].getFrame(frameCounter).getPath());
         	int counter = layerCounter[frameCounter];
         	int j = 0;
             if(layers[frameCounter][0] != null) {
@@ -91,7 +91,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
             leftLayer.add(leftVideo, j);		
         }
         else if(index == 1) {
-            readImg(rightImg, videos[rightListTracker].getFrame(frameCounter));
+            readImg(rightImg, videos[rightListTracker].getFrame(frameCounter).getPath());
             rightVideo.revalidate();
             rightVideo.repaint();
         }
@@ -123,7 +123,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         JScrollPane rightListScrollPane = new JScrollPane(rightVideoList);
         rightListScrollPane.setPreferredSize(new Dimension(130, 280));
 
-        comboModel = new DefaultComboBoxModel();
+        comboModel = new DefaultComboBoxModel<String>();
         hyperLinkList = new JComboBox<String>(comboModel);
         hyperLinkList.setEditable(false);
         hyperLinkList.setEnabled(false);
@@ -199,6 +199,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         b.anchor = GridBagConstraints.CENTER;
         b.gridx = 0;
         b.gridy = 0;
+        b.weightx = 0.4;
         b.insets = new Insets(0,6,15,6);  // padding
         buttons.add(create, b);
  
@@ -266,11 +267,11 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         c.gridy = 3;
         //c.insets = new Insets(0,8,10,6);  //padding
         panel.add(rightProgressTime, c);
-     
+        
         frame.getContentPane().add(panel);
         frame.pack();           
         frame.setJMenuBar(menuBar); 
-        frame.setSize(1150, 430);
+        frame.setSize(1200, 430);
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
@@ -338,6 +339,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         	String input = hyperLinkList.getEditor().getItem().toString();
         	if(comboModel.getIndexOf(input) == -1){
         		hyperLinkList.addItem(input);
+        		hyperLinkList.getEditor().setItem("");
         	}
         	else{
         		JOptionPane.showMessageDialog(frame, "Name Already Exists!");
@@ -345,7 +347,8 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         	
         }
         if(e.getSource() == delete) {
-        	hyperLinkList.removeItemAt(hyperLinkList.getSelectedIndex());
+        	hyperLinkList.removeItem(hyperLinkList.getSelectedItem());
+    		hyperLinkList.getEditor().setItem("");
         }
          
     }

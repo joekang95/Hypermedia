@@ -5,18 +5,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
  
 public class VideoReader {
         
     public static HyperVideo importVideo(String name, String directory, int width, int height, String frameType, String audioType){
-        String[] img = importFrames(directory, width, height, frameType);
+    	ArrayList<HyperFrame> frames = importFrames(directory, width, height, frameType);
         String audio = importAudio(directory, audioType);
-        return new HyperVideo(img, audio, name, width, height);
+        return new HyperVideo(frames, audio, name, width, height);
 
     }
  
-    public static String[] importFrames(String directory, int width, int height, String fileType) {
+    public static ArrayList<HyperFrame> importFrames(String directory, int width, int height, String fileType) {
         File folder = new File(directory);
         File[] listOfFiles = folder.listFiles(new FileFilter(){
 			public boolean accept(File file) {
@@ -24,13 +25,17 @@ public class VideoReader {
 			}
         });
         
-        String[] rgbFiles = new String[listOfFiles.length];
-        for(int i = 0 ; i < listOfFiles.length ; i++) {
-        	rgbFiles[i] = listOfFiles[i].getPath();
+        String[] framePaths = new String[listOfFiles.length];
+        for(int i = 0; i < listOfFiles.length;i++) {
+        	framePaths[i] = listOfFiles[i].getPath();	        
         }
-        
-        Arrays.sort(rgbFiles);
-        return rgbFiles;
+        Arrays.sort(framePaths);
+       
+        ArrayList<HyperFrame> frames = new ArrayList<HyperFrame>();
+        for(String framePath: framePaths) {
+        	frames.add(new HyperFrame(framePath));
+        }
+        return frames;
     }
     
     public static String importAudio(String directory, String fileType) {
