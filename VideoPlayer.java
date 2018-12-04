@@ -44,13 +44,13 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         IMAGE_WIDTH = videos[listTracker].getWidth();
         IMAGE_HEIGHT = videos[listTracker].getHeight();
         img = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
-        readImg(videos[listTracker].getFrame(0)); 
+        readImg(videos[listTracker].getFrame(0).getPath()); 
         GUI();
     }
      
     public void updateImage(){
         frameCounter++;
-        readImg(videos[listTracker].getFrame(frameCounter));
+        readImg(videos[listTracker].getFrame(frameCounter).getPath());
         videoPanel.revalidate();
         videoPanel.repaint();
     }
@@ -173,7 +173,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             progressBar.setValue(0);
             videoPanel.removeAll();
             listTracker = videoList.getSelectedIndex();
-            readImg(videos[listTracker].getFrame(frameCounter));
+            readImg(videos[listTracker].getFrame(frameCounter).getPath());
             videoPanel.add(new JLabel(new ImageIcon (img)));
             videoPanel.revalidate();
             videoPanel.repaint();   
@@ -192,7 +192,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
                             //sound.stopMusic();
                             progressTime.setText("0:00/5:00");
                             progressBar.setValue(0);
-                            readImg(videos[listTracker].getFrame(0));
+                            readImg(videos[listTracker].getFrame(0).getPath());
                             videoPanel.revalidate();
                             videoPanel.repaint();
                             playing = false;
@@ -230,7 +230,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             playing = false;
             resume = false;
             sound.stopMusic();
-            readImg(videos[listTracker].getFrame(0));
+            readImg(videos[listTracker].getFrame(0).getPath());
             videoPanel.revalidate();
             videoPanel.repaint();
             progressBar.setValue(0);

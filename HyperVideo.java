@@ -1,14 +1,16 @@
+import java.util.ArrayList;
+
 public class HyperVideo {
      
-    private int width, height ;
-    private String img[];
+    private int width, height;
+    private ArrayList<HyperFrame> frames;
     private String audio;
     private String name;
      
-    HyperVideo(String[] img, String audio, String name, int width, int height){
+    HyperVideo(ArrayList<HyperFrame> frames, String audio, String name, int width, int height){
         this.width = width;
         this.height = height;
-        this.img = img;
+        this.frames = frames;
         this.audio = audio;
         this.name = name;
     }
@@ -21,12 +23,12 @@ public class HyperVideo {
         return audio;
     }
      
-    String getFrame(int i) {
-        return img[i];
+    HyperFrame getFrame(int i) {
+        return frames.get(i);
     }
     
     int getFrameSize() {
-    	return img.length;
+    	return frames.size();
     }
      
     int getWidth() {
