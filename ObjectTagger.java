@@ -12,7 +12,7 @@ public class ObjectTagger {
 		BufferedImage linkImage = extractImage(img, link.getX(), link.getY(), link.getWidth(), link.getHeight());
 		
 		HyperLink obj = link.duplicate();	
-		for(int i = frameIndex+1; i < video.getFrameSize(); i++) {
+		for(int i=frameIndex; i<video.getFrameSize(); i++) {
 			System.out.printf("Frame: %d, ",i);
 			BufferedImage curFrame = VideoReader.importImage(video.getFramePath(i), video.getWidth(), video.getHeight());
 			obj = searchImage(curFrame, linkImage, obj, obj.getX(), obj.getY(), k);

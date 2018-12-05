@@ -104,7 +104,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         	rightVideoList.setSelectedIndex(rightListTracker);
 			rightFrameCounter = links.get(selectedIndex).getToVideoFrameIndex();
         	rightSlider.setValue(rightFrameCounter);
-        	System.out.println(rightFrameCounter);
+        	//System.out.println(rightFrameCounter);
         	updateImage(1);	
         }
     }
@@ -168,11 +168,11 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
             		}
             		rightListTracker++;
             	}
-            	System.out.println(rightListTracker);
+            	//System.out.println(rightListTracker);
             	rightVideoList.setSelectedIndex(rightListTracker);
     			rightFrameCounter = links.get(selectedIndex).getToVideoFrameIndex();
             	rightSlider.setValue(rightFrameCounter);
-            	System.out.println(rightFrameCounter);
+            	//System.out.println(rightFrameCounter);
             	updateImage(1);	
             }
         }
@@ -453,13 +453,18 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         	if(creating && connected) {
 	        	if(comboModel.getIndexOf(input) == -1){
 	        		if(input.matches("(\\w|\\d)+")){
-
-						String s = UUID.randomUUID().toString(); 
 		        		HyperLink newLink = new HyperLink((int)newLayer.x1,
 		        					(int)newLayer.y1, (int)newLayer.sizeX, 
-		        					(int)newLayer.sizeY, input, s,
+		        					(int)newLayer.sizeY, input,
 		        					selectedRightName, selectedRightFrame);
-		        		links.add(newLink);
+		        		
+		        		try {
+							ObjectTagger.autoTagging(newLink, videos[leftListTracker], leftFrameCounter, 8, 50);
+						} catch (Exception e1) {
+							JOptionPane.showMessageDialog(frame, "Auto Tagging Failed!");
+						}
+		        		
+		        		//links.add(newLink);
 		        		// = videos[leftListTracker].getFrame(frameCounter).addLink(newLink);
 		        		hyperLinkList.addItem(input);
 		        		hyperLinkList.setEditable(false);
