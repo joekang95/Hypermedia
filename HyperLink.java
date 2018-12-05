@@ -45,6 +45,7 @@ public class HyperLink {
 	}
 	
 	HyperLink(JSONObject jsonLink) throws JSONException {
+		this.id = jsonLink.getString("id");
 		this.x = jsonLink.getInt("x");
 		this.y = jsonLink.getInt("y");
 		this.width = jsonLink.getInt("width");
