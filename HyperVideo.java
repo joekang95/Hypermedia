@@ -20,8 +20,9 @@ public class HyperVideo {
     private String audio;
     private String name;
     private Map<String, ArrayList<Integer>> allLinks;
-     
-    HyperVideo(String prefixPath, ArrayList<HyperFrame> frames, String audio, String name, int width, int height){
+    private ArrayList<Integer> scenes;
+    
+    HyperVideo(String prefixPath, ArrayList<HyperFrame> frames, ArrayList<Integer> scenes, String audio, String name, int width, int height){
     	this.prefixPath = prefixPath + "/";
         this.width = width;
         this.height = height;
@@ -29,6 +30,7 @@ public class HyperVideo {
         this.audio = audio;
         this.name = name;
         this.allLinks = readAllLinks();
+        this.scenes = scenes;
         
         try {
 			this.saveMetaData();
@@ -69,6 +71,22 @@ public class HyperVideo {
         return height;
     }
     
+    public Integer getScene(int i) {
+    	return scenes.get(i);
+    }
+    
+    public ArrayList<Integer> getScenes(){
+    	return scenes;
+    }
+    
+    public Integer getScenesSize() {
+    	return scenes.size();
+    }
+    
+    public void setScenes(ArrayList<Integer> scenes) {
+    	this.scenes = scenes;
+    }
+    
     public ArrayList<Integer> getLinkRange(String uuid){
     	return allLinks.get(uuid);
     }
@@ -106,6 +124,7 @@ public class HyperVideo {
     	obj.put("width", width);
     	obj.put("height", height);
     	obj.put("audio", audio);
+    	obj.put("scenes", scenes);
     	
     	JSONArray jsonFrames = new JSONArray();
     	for(HyperFrame frame : frames) 

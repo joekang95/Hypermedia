@@ -20,18 +20,22 @@ public class VideoReader {
     public static HyperVideo importVideo(String name, String directory, int width, int height, String frameType, String audioType){
     	ArrayList<HyperFrame> frames = null;
     	String audio = null;
+    	ArrayList<Integer> scenes = null;
     	try {
     		JSONObject metaJson = importMetaData(directory);
     		JSONArray jsonFrames = metaJson.getJSONArray("frames");
+    		JSONArray jsonScenes = metaJson.optJSONArray("scenes");
     		frames = importFrames(jsonFrames);
+    		scenes = importScenes(jsonScenes);
     		audio = metaJson.getString("audio");
     	}
     	catch (JSONException | FileNotFoundException e){
     		System.out.printf("Initial %s metadata\n", name);
     		frames = importFrames(directory, frameType);
     		audio = importAudio(directory, audioType);
+    		scenes = new ArrayList<Integer>();
     	}	
-        return new HyperVideo(directory, frames, audio, name, width, height);
+        return new HyperVideo(directory, frames, scenes, audio, name, width, height);
     }
  
     public static JSONObject importMetaData(String directory) throws FileNotFoundException, JSONException{
@@ -44,7 +48,6 @@ public class VideoReader {
     	ArrayList<HyperFrame> frames = new ArrayList<HyperFrame>();
     	for(int i=0; i<jsonFrames.length(); i++) {
 			JSONObject jsonFrame = jsonFrames.getJSONObject(i);
-			String path = jsonFrame.getString("path");
 			frames.add(new HyperFrame(jsonFrame));
 		}
     	return frames;
@@ -64,6 +67,14 @@ public class VideoReader {
         	frames.add(new HyperFrame(frameName));
         }
         return frames;
+    }
+    
+    public static ArrayList<Integer> importScenes(JSONArray jsonScenes) throws JSONException{
+    	ArrayList<Integer> scenes = new ArrayList<Integer>();
+    	for(int i=0; i<jsonScenes.length(); i++) {
+    		scenes.add((Integer) jsonScenes.get(i));
+    	}
+    	return scenes;	
     }
     
     public static String importAudio(String directory, String fileType) {

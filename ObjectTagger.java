@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -38,6 +39,68 @@ public class ObjectTagger {
 		}
 	}
 	
+	public static void sceneDetect(HyperVideo video) throws Exception{
+		int objX = 117, objY = 96;
+		int objWidth = 117, objHeight = 96;
+		int base = 10, k = 8;
+			
+		ArrayList<Double> diffList = new ArrayList<Double>();
+		
+		BufferedImage img1 = VideoReader.importImage(video.getFramePath(0), video.getWidth(), video.getHeight());
+		HyperLink obj = new HyperLink(objX, objY, objWidth, objHeight);
+		BufferedImage objImage = ObjectTagger.extractImage(img1, obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight());
+		
+		BufferedImage pre = img1;
+		BufferedImage preObjImage = objImage;
+		HyperLink preObj = obj;
+		for(int counter = 1; counter<video.getFrameSize(); counter=counter+base) {
+			BufferedImage cur = VideoReader.importImage(video.getFramePath(counter), video.getWidth(), video.getHeight());
+			HyperLink curObj = ObjectTagger.searchImage(cur, preObjImage, preObj, preObj.getX(), preObj.getY(), k);
+			diffList.add(curObj.getDiff());
+			pre = cur;
+			preObj = obj;
+			preObjImage = ObjectTagger.extractImage(pre, preObj.getX(), preObj.getY(), preObj.getWidth(), preObj.getHeight());
+		}
+		
+		ArrayList<Double> slope = new ArrayList<Double>();
+		
+		double preDiff = diffList.get(0);
+		for(int i = 1; i<diffList.size(); i++) {
+			double curDiff = diffList.get(i);
+			double diff = curDiff - preDiff ;
+			if(diff < 0)
+				diff = 0;
+			slope.add(diff);
+			preDiff = curDiff;
+		}
+		
+		double mean = mean(slope);
+		double std = std(slope);
+		
+		//System.out.printf("MEAN: %f, STD: %f\n", mean, std);
+		
+		LinkedList<Integer> indexes = new LinkedList<Integer>();
+		
+		double thresold = mean + std * 2; 
+		for(int i=0; i<slope.size(); i++) {
+			if(slope.get(i) > thresold)
+				indexes.add((i+2)* base + 1);
+		}
+		
+		ArrayList<Integer> scenes = new ArrayList<Integer>();
+		
+		int index = indexes.pop();
+		scenes.add(index);
+		while(!indexes.isEmpty()) {
+			index = indexes.pop();
+			if(index - scenes.get(scenes.size()-1) >= 90)
+				scenes.add(index);
+		}
+		if(scenes.get(scenes.size()-1)>=9000)
+			scenes.remove(scenes.size()-1);
+		video.setScenes(scenes);
+	}
+	
 	public static HyperLink searchImage(BufferedImage img, BufferedImage objImage, HyperLink obj, int searchX, int searchY, int searchK) throws Exception {
 		int leftSearchBound = Math.max(searchX - searchK, 0);
 		int rightSearchBound = Math.min(searchX + searchK, img.getWidth());
@@ -61,7 +124,7 @@ public class ObjectTagger {
 				}
 			}
 		}
-		System.out.printf("(%d, %d) W:%d, H%d - Min Diff = %f\n", minDiffObj.getX(), minDiffObj.getY(), minDiffObj.getWidth(), minDiffObj.getHeight(), minDiffObj.getDiff());
+		//System.out.printf("(%d, %d) W:%d, H%d - Min Diff = %f\n", minDiffObj.getX(), minDiffObj.getY(), minDiffObj.getWidth(), minDiffObj.getHeight(), minDiffObj.getDiff());
 		return minDiffObj;
 	}
 	
@@ -120,4 +183,25 @@ public class ObjectTagger {
 		}
 		return img;
 	}
+	
+	public static double std(ArrayList<Double> table) { 
+    	double mean = mean(table);
+        double temp = 0;
+        for (int i = 0; i < table.size(); i++)
+            temp += Math.pow(table.get(i) - mean, 2);
+        
+        double meanOfDiffs = temp / (table.size());
+        return Math.sqrt(meanOfDiffs);
+    }
+	
+	public static double sum(ArrayList<Double> table) {
+    	double sum = 0;
+    	for(double item : table)
+    		sum += item;
+    	return sum;
+    }
+    
+    public static double mean(ArrayList<Double> table) {
+    	return sum(table)/table.size();
+    }
 }
