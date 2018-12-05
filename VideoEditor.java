@@ -70,7 +70,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
      
     HyperVideo[] videos;
     LayerPanel newLayer = null;
-    LayerPanel[] layerPanels;
+    ArrayList<LayerPanel> layerPanels;
     ArrayList<HyperLink> links;
     
     VideoEditor(HyperVideo[] videos){
@@ -82,11 +82,11 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 		int layer = 0;
 		int selectedIndex = hyperLinkList.getSelectedIndex();
 		links = videos[leftListTracker].getFrame(frameCounter).getLinks();
-		layerPanels = new LayerPanel[links.size()];
+		layerPanels = new ArrayList<LayerPanel>();
 		for(HyperLink l : links){
 			boolean top = (layer == selectedIndex) ? true : false;
-			layerPanels[layer] = new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight(), l.getName(), top);
-			leftLayer.add(layerPanels[layer], layer);
+			layerPanels.add(new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight(), l.getName(), top));
+			leftLayer.add(layerPanels.get(layer), layer);
 			layer++;
     	}
         leftLayer.add(leftVideo, layer);
@@ -99,15 +99,16 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 			
 			// Save temporary changes if frame doesn't change
 			int size = videos[leftListTracker].getFrame(frameCounter).getLinksSize();
-			int offset = (size == layerPanels.length) ? 0 : (size - layerPanels.length);
+			int offset = (size == layerPanels.size()) ? 0 : (size - layerPanels.size());
 		
-			if(layerPanels.length != 0 && !frameChange) {
+			if(layerPanels.size() != 0 && !frameChange) {
 				for(int i = 0 ; i < size - offset; i++) {
-					LayerPanel p = layerPanels[i];
+					LayerPanel p = layerPanels.get(i);
 					links.get(i).setX((int)p.x1);
 					links.get(i).setY((int)p.y1);
 					links.get(i).setWidth((int)p.sizeX);
 					links.get(i).setHeight((int)p.sizeY);
+					// links = videos[leftListTracker].getFrame(frameCounter).getLinks()
 				}
 			}
 			
@@ -125,11 +126,11 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 			// Add layers
 			int layer = 0;		
 			int selectedIndex = hyperLinkList.getSelectedIndex();
-			layerPanels = new LayerPanel[links.size()];
+			layerPanels = new ArrayList<LayerPanel>();
 			for(HyperLink l : links){
-				boolean top = (layer == hyperLinkList.getSelectedIndex()) ? true : false;
-				layerPanels[layer] = new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight(), l.getName(), top);
-				leftLayer.add(layerPanels[layer], layer);
+				boolean top = (layer == selectedIndex) ? true : false;
+				layerPanels.add(new LayerPanel(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight(), l.getName(), top));
+				leftLayer.add(layerPanels.get(layer), layer);
 				layer++;
         	}
             leftLayer.add(leftVideo, layer);
@@ -350,6 +351,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
             	leftSlider.setValue(0);
                 leftProgressTime.setText("Frame 0001");
                 leftListTracker = leftVideoList.getSelectedIndex();
+                frameChange = true;
                 updateImage(0);
                 creating = false; 
             }
@@ -403,8 +405,8 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 	        	if(comboModel.getIndexOf(input) == -1){
 	        		if(input.matches("(\\w|\\d)+")){
 		        		HyperLink newLink = new HyperLink((int)newLayer.x1, (int)newLayer.y1, (int)newLayer.sizeX, (int)newLayer.sizeY, input);
-		        		//links.add(newLink);
-		        		videos[leftListTracker].getFrame(frameCounter).addLink(newLink);
+		        		links.add(newLink);
+		        		// = videos[leftListTracker].getFrame(frameCounter).addLink(newLink);
 		        		hyperLinkList.addItem(input);
 		        		hyperLinkList.setEditable(false);
 	        		}
@@ -412,20 +414,29 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 		        		hyperLinkList.getEditor().setItem("");
 	            		JOptionPane.showMessageDialog(frame, "Name Can Only Include Alphabets and Numbers");
 	        		}
+		    		creating = false;
 	        	}
 	        	else{
 	        		hyperLinkList.getEditor().setItem("");
 	        		JOptionPane.showMessageDialog(frame, "Name Already Exists!");
 	        	}
-	    		creating = false;
         	}
         }
         if(e.getSource() == delete) {
-//    		HyperLink newLink = links.getLink(hyperLinkList.getSelectedItem());
-//    		links.remove(newLink);
-    		hyperLinkList.getEditor().setItem("");
-    		buttons.revalidate();
-    		buttons.repaint();
+	        if(comboModel.getSize() != 0) {
+	        	int index = hyperLinkList.getSelectedIndex();
+	        	layerPanels.remove(index);
+	        	links.remove(index);
+	        	// = videos[leftListTracker].getFrame(frameCounter).getLinks().remove(index);
+	        	comboModel.removeAllElements();
+	            for(HyperLink l : links) {
+	            	comboModel.addElement(l.getName());
+	            }
+	    		updateImage(0);
+	        }
+	        else {
+        		JOptionPane.showMessageDialog(frame, "Nothing to Delete!");	
+	        }
         }   
         if(e.getSource() == save) {
     		try {
