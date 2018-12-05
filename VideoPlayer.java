@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -9,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.*;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -21,7 +23,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     static BufferedImage img = null;
     static String items[];
      
-    private boolean playing = false, resume = false;
+    private boolean playing = false, resume = false, initialize = true;
     private Timer timer;
     private int frameCounter = 0, listTracker = 0;
  
@@ -39,8 +41,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     JMenu menu = new JMenu("Menu");
     JMenuItem editor = new JMenuItem("Open Editor");
     JLayeredPane videoLayer = new JLayeredPane();
-    boolean test = true;
     HyperVideo[] videos;
+    ArrayList<LayerPresent> layerStorage = new ArrayList<LayerPresent>();
      
     VideoPlayer(HyperVideo[] videos){
         this.videos = videos; 
@@ -48,27 +50,32 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         IMAGE_HEIGHT = videos[listTracker].getHeight();
         img = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
         readImg(videos[listTracker].getFramePath(0)); 
+        
+		
         GUI();
     }
-     
+    
+    public void removeVideoLayper(){
+    	Component[] compons = videoLayer.getComponents();
+    	//System.out.printf("Layer num: H: %d\n", compons.length);
+    	for(int i = 1; i<compons.length; i++){
+    		videoLayer.remove(videoLayer.getPosition(compons[i]));
+    	}
+    }
+    
     public void updateImage(){
         frameCounter++;
         readImg(videos[listTracker].getFramePath(frameCounter));
-        videoPanel.revalidate();
-        videoPanel.repaint();
-        if(test){
-	        videoLayer.removeAll();
-	        
-	        // Add layers
-			int layer = 0;		
-			ArrayList<HyperLink> links = videos[listTracker].getFrame(0).getLinks();
-			for(HyperLink l : links){
-				videoLayer.add(new LayerPresent(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
-				layer++;
-	    	}
-			videoLayer.add(videoPanel, layer);
-        }
-        test = false;
+	    ArrayList<HyperLink> links = videos[listTracker].getFrame(frameCounter).getLinks();
+	
+	    removeVideoLayper();
+    	
+	    int layer = 1;	
+	    for(HyperLink l : links){
+	    	videoLayer.add(new LayerPresent(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
+			layer++;
+	    }	
+		videoLayer.add(videoPanel, layer);
     }
       
     public static void readImg(String fileName) {
@@ -154,7 +161,9 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         videoPanel.add(new JLabel(new ImageIcon (img)));
         videoPanel.setOpaque(false);
         videoPanel.setSize(videoLayer.getPreferredSize());
-        videoLayer.add(videoPanel, 0);
+        
+        videoLayer.add(new LayerPresent(88, 72, IMAGE_WIDTH, IMAGE_HEIGHT, 176, 144), 0);
+        videoLayer.add(videoPanel, 1);
         panel.add(videoLayer, c);
          
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -180,6 +189,24 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+        
+        
+        try {
+        	System.out.println("Sleep 2 secs");
+			TimeUnit.SECONDS.sleep(2);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}  
+        updateImage();
+        try {
+        	System.out.println("Sleep 2 secs");
+			TimeUnit.SECONDS.sleep(2);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}  
+        
+        updateImage();
+        
     }
  
     @Override
@@ -205,7 +232,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == play) {
             if(!playing){
-                timer = new Timer(1000/30, new ActionListener() {
+                timer = new Timer(1000/10, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if(frameCounter == 8999){
