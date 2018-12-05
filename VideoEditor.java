@@ -104,10 +104,11 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 			if(layerPanels.size() != 0 && !frameChange) {
 				for(int i = 0 ; i < size - offset; i++) {
 					LayerPanel p = layerPanels.get(i);
-					videos[leftListTracker].getFrame(frameCounter).getLinks().get(i).setX((int)p.x1);
-					videos[leftListTracker].getFrame(frameCounter).getLinks().get(i).setY((int)p.y1);
-					videos[leftListTracker].getFrame(frameCounter).getLinks().get(i).setWidth((int)p.sizeX);
-					videos[leftListTracker].getFrame(frameCounter).getLinks().get(i).setHeight((int)p.sizeY);
+					links.get(i).setX((int)p.x1);
+					links.get(i).setY((int)p.y1);
+					links.get(i).setWidth((int)p.sizeX);
+					links.get(i).setHeight((int)p.sizeY);
+					// links = videos[leftListTracker].getFrame(frameCounter).getLinks()
 				}
 			}
 			
@@ -413,12 +414,12 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 		        		hyperLinkList.getEditor().setItem("");
 	            		JOptionPane.showMessageDialog(frame, "Name Can Only Include Alphabets and Numbers");
 	        		}
+		    		creating = false;
 	        	}
 	        	else{
 	        		hyperLinkList.getEditor().setItem("");
 	        		JOptionPane.showMessageDialog(frame, "Name Already Exists!");
 	        	}
-	    		creating = false;
         	}
         }
         if(e.getSource() == delete) {
