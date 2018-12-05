@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -36,7 +38,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     JMenuBar menuBar = new JMenuBar();
     JMenu menu = new JMenu("Menu");
     JMenuItem editor = new JMenuItem("Open Editor");
-     
+    JLayeredPane videoLayer = new JLayeredPane();
+    boolean test = true;
     HyperVideo[] videos;
      
     VideoPlayer(HyperVideo[] videos){
@@ -53,6 +56,19 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         readImg(videos[listTracker].getFramePath(frameCounter));
         videoPanel.revalidate();
         videoPanel.repaint();
+        if(test){
+	        videoLayer.removeAll();
+	        
+	        // Add layers
+			int layer = 0;		
+			ArrayList<HyperLink> links = videos[listTracker].getFrame(0).getLinks();
+			for(HyperLink l : links){
+				videoLayer.add(new LayerPresent(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
+				layer++;
+	    	}
+			videoLayer.add(videoPanel, layer);
+        }
+        test = false;
     }
       
     public static void readImg(String fileName) {
@@ -95,6 +111,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         menuBar.add(menu);
          
         panel.setLayout(new GridBagLayout());
+        videoLayer.setLayout(null);
+        videoLayer.setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
          
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -132,9 +150,12 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         c.gridy = 1;
         c.gridwidth = 4;
         c.gridheight = 4;
-        c.insets = new Insets(0,6,10,6);  // padding
+        c.insets = new Insets(0,20,10,6);  // padding
         videoPanel.add(new JLabel(new ImageIcon (img)));
-        panel.add(videoPanel, c);
+        videoPanel.setOpaque(false);
+        videoPanel.setSize(videoLayer.getPreferredSize());
+        videoLayer.add(videoPanel, 0);
+        panel.add(videoLayer, c);
          
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 0;
