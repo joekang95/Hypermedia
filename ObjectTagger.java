@@ -1,5 +1,7 @@
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class ObjectTagger {
 	
@@ -7,7 +9,9 @@ public class ObjectTagger {
     final static int COLOR_GREEN = new Color(0,255,0).getRGB();
     final static int COLOR_BLUE =new Color(0,0,255).getRGB();
 	
-	public static void autoTagging(HyperLink link, HyperVideo video, int frameIndex, int k, int thresold) throws Exception {
+	public static void autoTagging(HyperLink link, HyperVideo video, int frameIndex, int k, int thresold, int tolrFail) throws Exception {
+		LinkedList<HyperLink> tolrFails = new LinkedList<HyperLink>();
+		
 		BufferedImage img = VideoReader.importImage(video.getFramePath(frameIndex), video.getWidth(), video.getHeight());
 		BufferedImage linkImage = extractImage(img, link.getX(), link.getY(), link.getWidth(), link.getHeight());
 		
@@ -18,9 +22,17 @@ public class ObjectTagger {
 			obj = searchImage(curFrame, linkImage, obj, obj.getX(), obj.getY(), k);
 		
 			if(obj.getDiff() < thresold) {
+				while(!tolrFails.isEmpty()) {
+					int forward = tolrFails.size();
+					HyperLink failObj = tolrFails.pop();
+					video.getFrame(i - forward).addLink(failObj);
+					video.updateAllLinks(failObj.getId(), i - forward);
+				}
 				video.getFrame(i).addLink(obj);
 				video.updateAllLinks(link.getId(), i);
 			}
+			else if(tolrFails.size() <= tolrFail)
+				tolrFails.push(obj);
 			else
 				break;
 		}

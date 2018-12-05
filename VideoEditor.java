@@ -462,7 +462,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 		        					selectedRightName, selectedRightFrame);
 		        		
 		        		try {
-							ObjectTagger.autoTagging(newLink, videos[leftListTracker], leftFrameCounter, 8, 50);
+							ObjectTagger.autoTagging(newLink, videos[leftListTracker], leftFrameCounter, 8, 50, 2);
 						} catch (Exception e1) {
 							JOptionPane.showMessageDialog(frame, "Auto Tagging Failed!");
 						}
