@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 
+@SuppressWarnings("serial")
 public class LayerPresent extends JPanel implements MouseListener {
 	
 	private int alpha = 127;
@@ -20,7 +21,6 @@ public class LayerPresent extends JPanel implements MouseListener {
 	Rectangle2D squareIn, squareOut;
 	public double x1 = 0, y1 = 0;
 	public double sizeX = 60, sizeY = 60, pointSize = 8;
-	private double x2 = x1 + sizeX, y2 = y1 + sizeY;
 	public boolean clickDetected = false;
 	ArrayList<HyperLink> links;
 	HyperLink click;
@@ -31,9 +31,6 @@ public class LayerPresent extends JPanel implements MouseListener {
     	this.sizeY = sizeY;
 		this.x1 = x1;
 		this.y1 = y1;
-
-		x2 = x1 + sizeX;
-		y2 = y1 + sizeY;
 		
 		squareIn = new Rectangle2D.Double(2, 2, sizeX - 4, sizeY - 4);
 		squareOut = new Rectangle2D.Double(0, 0, sizeX, sizeY);
@@ -51,9 +48,6 @@ public class LayerPresent extends JPanel implements MouseListener {
 		this.x1 = x1;
 		this.y1 = y1;
 		this.top = top;
-		
-		x2 = x1 + sizeX;
-		y2 = y1 + sizeY;
 		
 		squareIn = new Rectangle2D.Double(x1, y1, sizeX, sizeY);
         this.setOpaque(false);

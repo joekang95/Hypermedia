@@ -10,8 +10,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.*;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -270,6 +268,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
 	                        }
 	                        videoList.setSelectedIndex(index);
 	                        progressBar.setValue(destFrame / 30);
+	                        frameCounter = destFrame;
+	                        resume = true;
 	                        updateImage();
 	                        coverLayer.clickDetected = false;
                         }
@@ -320,7 +320,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         resume = true;
         if(playing) {
         	sound.stopMusic();
-        	System.out.println(videos[listTracker].getAudioPath());
+//        	System.out.println(videos[listTracker].getAudioPath());
             sound = new PlayWaveFile(videos[listTracker].getAudioPath(), resume, frameCounter);
             sound.start();
         }

@@ -12,8 +12,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.UUID;
-
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -104,7 +102,6 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         	rightVideoList.setSelectedIndex(rightListTracker);
 			rightFrameCounter = links.get(selectedIndex).getToVideoFrameIndex();
         	rightSlider.setValue(rightFrameCounter);
-        	//System.out.println(rightFrameCounter);
         	updateImage(1);	
         }
     }
@@ -160,19 +157,18 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
             // Reset boolean of frameChange
             frameChange = false;
             
-            rightListTracker = 0;
+            int tempTracker = 0;
             if(hyperLinkList.getSelectedIndex() != -1){
             	for(HyperVideo v : videos){
             		if(v.getName().equals(links.get(selectedIndex).getToVideoName())){
             			break;
             		}
-            		rightListTracker++;
+            		tempTracker++;
             	}
-            	//System.out.println(rightListTracker);
+            	rightListTracker = tempTracker;
             	rightVideoList.setSelectedIndex(rightListTracker);
     			rightFrameCounter = links.get(selectedIndex).getToVideoFrameIndex();
             	rightSlider.setValue(rightFrameCounter);
-            	//System.out.println(rightFrameCounter);
             	updateImage(1);	
             }
         }
