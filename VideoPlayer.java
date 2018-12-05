@@ -23,7 +23,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     static BufferedImage img = null;
     static String items[];
      
-    private boolean playing = false, resume = false, initialize = true;
+    private boolean playing = false, resume = false;
     private Timer timer;
     private int frameCounter = 0, listTracker = 0;
  
@@ -31,6 +31,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     JFrame frame = new JFrame();
     JPanel panel = new JPanel();
     JPanel videoPanel = new JPanel();
+    LayerPresent coverLayer = new LayerPresent(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, true);
     JButton play = new JButton("Play");
     JButton pause = new JButton("Pause");
     JButton stop = new JButton("Stop");
@@ -42,7 +43,6 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     JMenuItem editor = new JMenuItem("Open Editor");
     JLayeredPane videoLayer = new JLayeredPane();
     HyperVideo[] videos;
-    ArrayList<LayerPresent> layerStorage = new ArrayList<LayerPresent>();
      
     VideoPlayer(HyperVideo[] videos){
         this.videos = videos; 
@@ -50,12 +50,10 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         IMAGE_HEIGHT = videos[listTracker].getHeight();
         img = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
         readImg(videos[listTracker].getFramePath(0)); 
-        
-		
         GUI();
     }
     
-    public void removeVideoLayper(){
+    public void removeVideoLayer(){
     	Component[] compons = videoLayer.getComponents();
     	//System.out.printf("Layer num: H: %d\n", compons.length);
     	for(int i = 1; i<compons.length; i++){
@@ -67,9 +65,9 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         frameCounter++;
         readImg(videos[listTracker].getFramePath(frameCounter));
 	    ArrayList<HyperLink> links = videos[listTracker].getFrame(frameCounter).getLinks();
-	
-	    removeVideoLayper();
-    	
+	    coverLayer.setClickArea(links);
+	    
+	    removeVideoLayer();
 	    int layer = 1;	
 	    for(HyperLink l : links){
 	    	videoLayer.add(new LayerPresent(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
@@ -162,7 +160,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         videoPanel.setOpaque(false);
         videoPanel.setSize(videoLayer.getPreferredSize());
         
-        videoLayer.add(new LayerPresent(88, 72, IMAGE_WIDTH, IMAGE_HEIGHT, 176, 144), 0);
+        
+        videoLayer.add(coverLayer, 0);
         videoLayer.add(videoPanel, 1);
         panel.add(videoLayer, c);
          
@@ -191,19 +190,19 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
         
         
-        try {
-        	System.out.println("Sleep 2 secs");
-			TimeUnit.SECONDS.sleep(2);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}  
-        updateImage();
-        try {
-        	System.out.println("Sleep 2 secs");
-			TimeUnit.SECONDS.sleep(2);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}  
+//        try {
+//        	System.out.println("Sleep 2 secs");
+//			TimeUnit.SECONDS.sleep(2);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}  
+//        updateImage();
+//        try {
+//        	System.out.println("Sleep 2 secs");
+//			TimeUnit.SECONDS.sleep(2);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}  
         
         updateImage();
         
@@ -225,6 +224,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             videoPanel.add(new JLabel(new ImageIcon (img)));
             videoPanel.revalidate();
             videoPanel.repaint();   
+            playing = false;
         }
     }
  
@@ -232,7 +232,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == play) {
             if(!playing){
-                timer = new Timer(1000/10, new ActionListener() {
+                timer = new Timer(1000/30, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if(frameCounter == 8999){
@@ -257,6 +257,22 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
 	                            play.getModel().setPressed(false);
 	                        }
                         }
+                        if(coverLayer.clickDetected){
+	                        HyperLink obtainClickLink = coverLayer.click;
+	                        int destFrame = obtainClickLink.getToVideoFrameIndex();
+	                        String destVideo = obtainClickLink.getToVideoName();
+	                        int index = 0;
+	                        for(HyperVideo v : videos){
+	                        	if(v.getName().equals(destVideo)){
+	                        		break;
+	                        	}
+	                        	index++;
+	                        }
+	                        videoList.setSelectedIndex(index);
+	                        progressBar.setValue(destFrame / 30);
+	                        updateImage();
+	                        coverLayer.clickDetected = false;
+                        }
                     }
                 }); 
                 
@@ -279,8 +295,9 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             resume = false;
             sound.stopMusic();
             readImg(videos[listTracker].getFramePath(0));
-            videoPanel.revalidate();
-            videoPanel.repaint();
+            updateImage();
+//            videoPanel.revalidate();
+//            videoPanel.repaint();
             progressBar.setValue(0);
             progressTime.setText("0:00/5:00");
         }
