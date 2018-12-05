@@ -3,6 +3,7 @@ import org.json.JSONObject;
 
 public class HyperLink {
 	
+	private String id;
 	private int x, y, width, height;
 	private String name = null;
 	private String toVideoName = null;
@@ -23,7 +24,17 @@ public class HyperLink {
 		this.name = name;
 	}
 	
-	HyperLink(int x, int y, int width, int height, String name, String toVideoName, int toVideoFrameIndex){
+	HyperLink(int x, int y, int width, int height, String name, String id){
+		this.id = id;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		this.name = name;
+	}
+	
+	HyperLink(int x, int y, int width, int height, String name, String id, String toVideoName, int toVideoFrameIndex){
+		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -41,6 +52,10 @@ public class HyperLink {
 		this.name = jsonLink.getString("name");
 		this.toVideoName = jsonLink.optString("toVideoName");
 		this.toVideoFrameIndex = jsonLink.optInt("toVideoFrameIndex");
+	}
+	
+	public String getId() {
+		return id;
 	}
 	
 	public int getX() {

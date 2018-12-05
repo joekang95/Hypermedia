@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +19,7 @@ public class HyperVideo {
     private String prefixPath;
     private String audio;
     private String name;
+    private Map<String, ArrayList<Integer>> allLinks;
      
     HyperVideo(String prefixPath, ArrayList<HyperFrame> frames, String audio, String name, int width, int height){
     	this.prefixPath = prefixPath + "/";
@@ -25,6 +28,8 @@ public class HyperVideo {
         this.frames = frames;
         this.audio = audio;
         this.name = name;
+        this.allLinks = readAllLinks();
+        
         try {
 			this.saveMetaData();
 		} catch (IOException | JSONException e) {
@@ -62,6 +67,24 @@ public class HyperVideo {
      
     int getHeight() {
         return height;
+    }
+    
+    public ArrayList<Integer> getLinkRange(String uuid){
+    	return allLinks.get(uuid);
+    }
+    
+    private Map<String, ArrayList<Integer>> readAllLinks() {
+    	Map<String, ArrayList<Integer>> allLinks = new HashMap<String, ArrayList<Integer>>();
+    	for(int index = 0; index < frames.size(); index++) {
+    		HyperFrame frame = frames.get(index);
+    		for(HyperLink link : frame.getLinks()) {
+    			String uuid = link.getId();
+    			if(!allLinks.containsKey(uuid))
+    				allLinks.put(uuid, new ArrayList<Integer>());
+    			allLinks.get(uuid).add(index);
+    		}
+    	}
+    	return allLinks;
     }
     
     void saveMetaData() throws IOException, JSONException {
