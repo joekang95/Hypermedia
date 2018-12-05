@@ -49,6 +49,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         IMAGE_WIDTH = videos[listTracker].getWidth();
         IMAGE_HEIGHT = videos[listTracker].getHeight();
         img = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        coverLayer.setClickArea(videos[listTracker].getFrame(frameCounter).getLinks());
         readImg(videos[listTracker].getFramePath(frameCounter)); 
         GUI();
     }
@@ -62,7 +63,6 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     }
     
     public void updateImage(){
-    	System.out.println("KKK");
         frameCounter++;
         readImg(videos[listTracker].getFramePath(frameCounter));
 	    ArrayList<HyperLink> links = videos[listTracker].getFrame(frameCounter).getLinks();
@@ -218,6 +218,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == play) {
             if(!playing){
+            	coverLayer.clickDetected = false;
                 timer = new Timer(1000/30, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -254,9 +255,15 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
 	                        	}
 	                        	index++;
 	                        }
+	                        timer.stop();
+	                        sound.pauseMusic(destFrame);
 	                        videoList.setSelectedIndex(index);
 	                        progressBar.setValue(destFrame / 30);
+                            int tmp = destFrame / 30;
+                            int min = tmp / 60, ten = (tmp % 60) / 10, sec = (tmp % 60) % 10;
+                            progressTime.setText(min + ":" + ten + sec + "/5:00");
 	                        frameCounter = destFrame;
+	                        playing = false;
 	                        resume = true;
 	                        updateImage();
 	                        coverLayer.clickDetected = false;
@@ -288,7 +295,9 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             progressTime.setText("0:00/5:00");
         }
         if(e.getSource() == editor) {
-        	stop.doClick();
+        	if(playing){
+        		stop.doClick();
+        	}
             frame.dispose();
             new VideoEditor(videos);
         }

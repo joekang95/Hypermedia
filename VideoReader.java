@@ -24,7 +24,7 @@ public class VideoReader {
     	try {
     		JSONObject metaJson = importMetaData(directory);
     		JSONArray jsonFrames = metaJson.getJSONArray("frames");
-    		JSONArray jsonScenes = metaJson.optJSONArray("scenes");
+    		JSONArray jsonScenes = metaJson.getJSONArray("scenes");
     		frames = importFrames(jsonFrames);
     		scenes = importScenes(jsonScenes);
     		audio = metaJson.getString("audio");

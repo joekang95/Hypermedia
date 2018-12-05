@@ -1,6 +1,5 @@
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -18,7 +17,6 @@ public class ObjectTagger {
 		
 		HyperLink obj = link.duplicate();	
 		for(int i=frameIndex; i<video.getFrameSize(); i++) {
-			System.out.printf("Frame: %d, ",i);
 			BufferedImage curFrame = VideoReader.importImage(video.getFramePath(i), video.getWidth(), video.getHeight());
 			obj = searchImage(curFrame, linkImage, obj, obj.getX(), obj.getY(), k);
 		
