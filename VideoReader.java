@@ -123,4 +123,36 @@ public class VideoReader {
             e.printStackTrace();
         }
     }
+    
+    public static BufferedImage importImage(String fileName, int width, int height) throws IOException {
+    	BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    		
+        File file = new File(fileName);
+        InputStream is = new FileInputStream(file);
+     
+        long len = file.length();
+        byte[] bytes = new byte[(int)len];
+             
+        int offset = 0, numRead = 0;
+             
+        while (offset < bytes.length && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0){
+        	offset += numRead;
+        }
+             
+        int id = 0;
+        for(int y = 0 ; y < img.getHeight(); y++){
+        	for(int x = 0 ; x < img.getWidth(); x++){
+                     
+                byte r = bytes[id];
+                byte g = bytes[id + img.getHeight() * img.getWidth()];
+                byte b = bytes[id + img.getHeight() * img.getWidth() * 2];
+ 
+                int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+                img.setRGB(x, y, pix);
+                id++;
+            }
+        }
+        is.close();
+        return img;
+    }
 }

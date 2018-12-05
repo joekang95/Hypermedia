@@ -1,3 +1,5 @@
+import java.util.UUID;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,8 +10,10 @@ public class HyperLink {
 	private String name = null;
 	private String toVideoName = null;
 	private int toVideoFrameIndex;
+	private double diff;
 	
 	HyperLink(int x, int y, int width, int height){
+		this.id = UUID.randomUUID().toString();
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -17,6 +21,7 @@ public class HyperLink {
 	}
 	
 	HyperLink(int x, int y, int width, int height, String name){
+		this.id = UUID.randomUUID().toString();
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -24,13 +29,15 @@ public class HyperLink {
 		this.name = name;
 	}
 	
-	HyperLink(int x, int y, int width, int height, String name, String id){
-		this.id = id;
+	HyperLink(int x, int y, int width, int height, String name, String toVideoName, int toVideoFrameIndex){
+		this.id = UUID.randomUUID().toString();
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.name = name;
+		this.toVideoName = toVideoName;
+		this.toVideoFrameIndex = toVideoFrameIndex;
 	}
 	
 	HyperLink(int x, int y, int width, int height, String name, String id, String toVideoName, int toVideoFrameIndex){
@@ -99,6 +106,14 @@ public class HyperLink {
 		this.name = name;
 	}
 	
+	public double getDiff() {
+		return diff;
+	}
+	
+	public void setDiff(double diff) {
+		this.diff = diff;
+	}
+	
 	public String getToVideoName() {
 		return toVideoName;
 	}
@@ -113,6 +128,10 @@ public class HyperLink {
 	
 	public void setToVideoFrameIndex(int toVideoFrameIndex) {
 		this.toVideoFrameIndex = toVideoFrameIndex;
+	}
+	
+	public HyperLink duplicate() {
+		return new HyperLink(x, y, width, height, name, id, toVideoName, toVideoFrameIndex);
 	}
 	
 	public JSONObject toJson() throws JSONException {

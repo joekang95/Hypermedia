@@ -87,6 +87,12 @@ public class HyperVideo {
     	return allLinks;
     }
     
+    public void updateAllLinks(String uuid, int frameIndex) {
+    	if(!allLinks.containsKey(uuid))
+			allLinks.put(uuid, new ArrayList<Integer>());
+		allLinks.get(uuid).add(frameIndex);
+    }
+    
     void saveMetaData() throws IOException, JSONException {
     	String metaDataPath = prefixPath + "metadata.json";
     	BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(metaDataPath), "utf-8"));
