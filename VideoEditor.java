@@ -58,7 +58,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
     JPanel buttons = new JPanel();
     JButton create = new JButton("Create Link");
     JButton cancel = new JButton("Cancel Link");
-    JButton connect = new JButton("Connect Frame");
+    //JButton connect = new JButton("Connect Frame");
     JButton add = new JButton("Add Link");
     JButton delete = new JButton("Delete Link");
     JButton save = new JButton("Sava Changes");
@@ -222,7 +222,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         	hyperLinkList.setEnabled(false);
         }
         create.addActionListener(this);
-        connect.addActionListener(this);
+        //connect.addActionListener(this);
         add.addActionListener(this);
         cancel.addActionListener(this);
         delete.addActionListener(this);
@@ -301,9 +301,9 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         b.gridy = 1;
         buttons.add(cancel, b);
  
-        b.gridx = 0;
-        b.gridy = 2;
-        buttons.add(connect, b);
+        //b.gridx = 0;
+        //b.gridy = 2;
+        //buttons.add(connect, b);
  
         b.gridx = 0;
         b.gridy = 3;
@@ -430,26 +430,29 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         		updateImage(0);
         	}
         }
-        if(e.getSource() == connect) {
+//        if(e.getSource() == connect) {
+//        	JOptionPane.showMessageDialog(frame, "Nothing To Do.");
+//        }
+        if(e.getSource() == add) {
+        	String input = hyperLinkList.getEditor().getItem().toString();
+        	
         	if(creating && (rightFrameCounter >= 0)){
             	selectedRightFrame = rightSlider.getValue();
             	selectedRightName = rightVideoList.getModel().getElementAt(rightVideoList.getSelectedIndex());
             	connected = true;
-        		JOptionPane.showMessageDialog(frame, "Connect Link Set Complete.");
+        		//JOptionPane.showMessageDialog(frame, "Connect Link Set Complete.");
         	}
         	else if((hyperLinkList.getSelectedIndex() != -1) && (rightFrameCounter >= 0)){
             	selectedRightFrame = rightSlider.getValue();
             	selectedRightName = rightVideoList.getModel().getElementAt(rightVideoList.getSelectedIndex());
             	connected = true;
-        		JOptionPane.showMessageDialog(frame, "Connect Link Set Complete.");
+        		//JOptionPane.showMessageDialog(frame, "Connect Link Set Complete.");
         		
         	}
         	else{
         		JOptionPane.showMessageDialog(frame, "Please Set Up Connect Area and/or Frame.");
         	}
-        }
-        if(e.getSource() == add) {
-        	String input = hyperLinkList.getEditor().getItem().toString();
+        	
         	if(creating && connected) {
 	        	if(comboModel.getIndexOf(input) == -1){
 	        		if(input.matches("(\\w|\\d)+")){
