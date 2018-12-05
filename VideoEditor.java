@@ -508,10 +508,12 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Chang
     		try {
     			updateImage(0);
 				videos[leftListTracker].saveMetaData();
+        		JOptionPane.showMessageDialog(frame, "Save Complete!");	
 			} catch (IOException e1) {
-				e1.printStackTrace();
+        		JOptionPane.showMessageDialog(frame, e1);
 			} catch (JSONException e1) {
 				e1.printStackTrace();
+        		JOptionPane.showMessageDialog(frame, e1);
 			}
         }
         if(e.getSource() == player){

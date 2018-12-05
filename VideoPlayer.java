@@ -22,6 +22,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     static int IMAGE_HEIGHT = 288;
     static BufferedImage img = null;
     static String items[];
+    static int fps = 31;
      
     private boolean playing = false, resume = false;
     private Timer timer;
@@ -64,17 +65,19 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     
     public void updateImage(){
         frameCounter++;
-        readImg(videos[listTracker].getFramePath(frameCounter));
-	    ArrayList<HyperLink> links = videos[listTracker].getFrame(frameCounter).getLinks();
-	    coverLayer.setClickArea(links);
-	    
-	    removeVideoLayer();
-	    int layer = 1;	
-	    for(HyperLink l : links){
-	    	videoLayer.add(new LayerPresent(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
-			layer++;
-	    }	
-		videoLayer.add(videoPanel, layer);
+        if(frameCounter < 9000){
+	        readImg(videos[listTracker].getFramePath(frameCounter));
+		    ArrayList<HyperLink> links = videos[listTracker].getFrame(frameCounter).getLinks();
+		    coverLayer.setClickArea(links);
+		    
+		    removeVideoLayer();
+		    int layer = 1;	
+		    for(HyperLink l : links){
+		    	videoLayer.add(new LayerPresent(l.getX(), l.getY(), IMAGE_WIDTH, IMAGE_HEIGHT, l.getWidth(), l.getHeight()), layer);
+				layer++;
+		    }	
+			videoLayer.add(videoPanel, layer);
+        }
     }
       
     public static void readImg(String fileName) {
@@ -190,9 +193,20 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+        
+        frameCounter--;
+        updateImage();
     
     }
  
+    public void setProgress(int tmp){
+        int min = tmp / 60, ten = (tmp % 60) / 10, sec = (tmp % 60) % 10;
+//        int totalMin = 9000 / fps / 60, totalTen = (9000 / fps % 60) / 10, totalSec = (9000 / fps % 60) % 10;
+//        progressTime.setText(min + ":" + ten + sec + "/" + totalMin +":" + totalTen + totalSec );
+        progressTime.setText(min + ":" + ten + sec + "/5:00");
+        progressBar.setValue(tmp);
+    }
+    
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if(e.getValueIsAdjusting() == false) {
@@ -201,8 +215,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
                 sound.stopMusic();
             }
             frameCounter = 0;
-            progressTime.setText("0:00/5:00");
-            progressBar.setValue(0);
+            setProgress(0);
             videoPanel.removeAll();
             listTracker = videoList.getSelectedIndex();
             readImg(videos[listTracker].getFramePath(frameCounter));
@@ -219,14 +232,12 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         if(e.getSource() == play) {
             if(!playing){
             	coverLayer.clickDetected = false;
-                timer = new Timer(1000/30, new ActionListener() {
+                timer = new Timer(1000/fps, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if(frameCounter == 8999){
                             timer.stop();
-                            //sound.stopMusic();
-                            progressTime.setText("0:00/5:00");
-                            progressBar.setValue(0);
+                            setProgress(0);
                             readImg(videos[listTracker].getFramePath(0));
                             videoPanel.revalidate();
                             videoPanel.repaint();
@@ -236,12 +247,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
                         }
                         else {
 	                        updateImage();
-	                        if(frameCounter > 1 && frameCounter % 30 == 0){
-	                            int tmp = frameCounter / 30;
-	                            int min = tmp / 60, ten = (tmp % 60) / 10, sec = (tmp % 60) % 10;
-	                            progressTime.setText(min + ":" + ten + sec + "/5:00");
-	                            progressBar.setValue(tmp);
-	                            play.getModel().setPressed(false);
+	                        if(frameCounter > 1 && frameCounter % fps == 0){
+	                            setProgress(frameCounter / fps);
 	                        }
                         }
                         if(coverLayer.clickDetected){
@@ -258,10 +265,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
 	                        timer.stop();
 	                        sound.pauseMusic(destFrame);
 	                        videoList.setSelectedIndex(index);
-	                        progressBar.setValue(destFrame / 30);
-                            int tmp = destFrame / 30;
-                            int min = tmp / 60, ten = (tmp % 60) / 10, sec = (tmp % 60) % 10;
-                            progressTime.setText(min + ":" + ten + sec + "/5:00");
+                            setProgress(destFrame /fps);
 	                        frameCounter = destFrame;
 	                        playing = false;
 	                        resume = true;
@@ -291,8 +295,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             sound.stopMusic();
             readImg(videos[listTracker].getFramePath(0));
             updateImage();
-            progressBar.setValue(0);
-            progressTime.setText("0:00/5:00");
+            setProgress(0);
         }
         if(e.getSource() == editor) {
         	if(playing){
@@ -309,10 +312,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         int mouseX = e.getX();
         //Computes how far along the mouse is relative to the component width then multiply it by the progress bar's maximum value.
         int progressBarVal = (int)Math.round(((double)mouseX / (double)progressBar.getWidth()) * progressBar.getMaximum());
-        progressBar.setValue(progressBarVal);
-        int min = progressBarVal / 60, ten = (progressBarVal % 60) / 10, sec = (progressBarVal % 60) % 10;
-        progressTime.setText(min + ":" + ten + sec + "/5:00");
-        frameCounter = progressBarVal * 30; 
+        setProgress(progressBarVal);
+        frameCounter = progressBarVal * fps; 
         updateImage();
         resume = true;
         if(playing) {
@@ -363,11 +364,9 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         	progressBarVal = progressBar.getMinimum();
         	outOfRange = true;
         }
-        progressBar.setValue(progressBarVal);
-        int min = progressBarVal / 60, ten = (progressBarVal % 60) / 10, sec = (progressBarVal % 60) % 10;
-        progressTime.setText(min + ":" + ten + sec + "/5:00");
+        setProgress(progressBarVal);
         if(!outOfRange){
-	        frameCounter = progressBarVal * 30; 
+	        frameCounter = progressBarVal * fps; 
 	        updateImage();
 	        resume = true;
 	        if(playing) {

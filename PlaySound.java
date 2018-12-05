@@ -65,9 +65,9 @@ public class PlaySound {
                     audioBuffer = new byte[this.EXTERNAL_BUFFER_SIZE];
                     readBytes = audioInputStream.read(audioBuffer, 0, audioBuffer.length - offset);
                     
-//                    System.out.println(readBytes);
-//                    System.out.println(audioInputStream.available() + "  " + seconds + "   " + n);
-          audioInputStream.skip(n);
+                    System.out.println(readBytes);
+                    System.out.println(audioInputStream.available() + "  " + seconds + "   " + n);
+                    audioInputStream.skip(n);
                 }
                 else{
                     offset = 0; 
