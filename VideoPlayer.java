@@ -8,13 +8,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.*;
 import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
  
-public class VideoPlayer implements ListSelectionListener, ActionListener, MouseListener {
+public class VideoPlayer implements ListSelectionListener, ActionListener, MouseListener, MouseMotionListener {
  
     static int IMAGE_WIDTH = 352;
     static int IMAGE_HEIGHT = 288;
@@ -47,7 +49,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         IMAGE_WIDTH = videos[listTracker].getWidth();
         IMAGE_HEIGHT = videos[listTracker].getHeight();
         img = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
-        readImg(videos[listTracker].getFramePath(0)); 
+        readImg(videos[listTracker].getFramePath(frameCounter)); 
         GUI();
     }
     
@@ -60,6 +62,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
     }
     
     public void updateImage(){
+    	System.out.println("KKK");
         frameCounter++;
         readImg(videos[listTracker].getFramePath(frameCounter));
 	    ArrayList<HyperLink> links = videos[listTracker].getFrame(frameCounter).getLinks();
@@ -101,6 +104,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         progressBar.setStringPainted(false);
         progressBar.setVisible(true);
         progressBar.addMouseListener(this);
+        progressBar.addMouseMotionListener(this);
          
         progressTime = new JTextField("0:00/5:00");
         progressTime.setEditable(false);
@@ -186,24 +190,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
-        
-        
-//        try {
-//        	System.out.println("Sleep 2 secs");
-//			TimeUnit.SECONDS.sleep(2);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}  
-//        updateImage();
-//        try {
-//        	System.out.println("Sleep 2 secs");
-//			TimeUnit.SECONDS.sleep(2);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}  
-        
-        updateImage();
-        
+    
     }
  
     @Override
@@ -297,12 +284,11 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             sound.stopMusic();
             readImg(videos[listTracker].getFramePath(0));
             updateImage();
-//            videoPanel.revalidate();
-//            videoPanel.repaint();
             progressBar.setValue(0);
             progressTime.setText("0:00/5:00");
         }
         if(e.getSource() == editor) {
+        	stop.doClick();
             frame.dispose();
             new VideoEditor(videos);
         }
@@ -351,5 +337,43 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
         // TODO Auto-generated method stub
          
     }
+
+	
+    @Override
+	public void mouseDragged(MouseEvent e) {
+		//Retrieves the mouse position relative to the component origin.
+        int mouseX = e.getX();
+        //Computes how far along the mouse is relative to the component width then multiply it by the progress bar's maximum value.
+        int progressBarVal = (int)Math.round(((double)mouseX / (double)progressBar.getWidth()) * progressBar.getMaximum());
+        boolean outOfRange = false;
+        if(progressBarVal > progressBar.getMaximum()){
+        	progressBarVal = progressBar.getMaximum();
+        	outOfRange = true;
+        }
+        if(progressBarVal < progressBar.getMinimum()){
+        	progressBarVal = progressBar.getMinimum();
+        	outOfRange = true;
+        }
+        progressBar.setValue(progressBarVal);
+        int min = progressBarVal / 60, ten = (progressBarVal % 60) / 10, sec = (progressBarVal % 60) % 10;
+        progressTime.setText(min + ":" + ten + sec + "/5:00");
+        if(!outOfRange){
+	        frameCounter = progressBarVal * 30; 
+	        updateImage();
+	        resume = true;
+	        if(playing) {
+	        	sound.stopMusic();
+	            sound = new PlayWaveFile(videos[listTracker].getAudioPath(), resume, frameCounter);
+	            sound.start();
+	        }
+        }
+	}
+
+	
+    @Override
+	public void mouseMoved(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
  
 }
