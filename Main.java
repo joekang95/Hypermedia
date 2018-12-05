@@ -37,7 +37,7 @@ public class Main {
             );
         }
         
-        //VideoPlayer videoPlayer = new VideoPlayer(videos);
+//        VideoPlayer videoPlayer = new VideoPlayer(videos);
         new VideoEditor(videos);
     }
      

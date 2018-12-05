@@ -223,6 +223,7 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             videoPanel.revalidate();
             videoPanel.repaint();   
             playing = false;
+            updateImage();
         }
     }
  
@@ -302,7 +303,8 @@ public class VideoPlayer implements ListSelectionListener, ActionListener, Mouse
             progressTime.setText("0:00/5:00");
         }
         if(e.getSource() == editor) {
-            System.out.println("click");
+            frame.dispose();
+            new VideoEditor(videos);
         }
     }
  

@@ -7,8 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +35,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.json.JSONException;
  
-public class VideoEditor implements ListSelectionListener, ActionListener, MouseListener, ChangeListener, ItemListener {
+public class VideoEditor implements ListSelectionListener, ActionListener, ChangeListener, ItemListener {
      
     static int IMAGE_WIDTH = 352;
     static int IMAGE_HEIGHT = 288;
@@ -214,9 +212,9 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         hyperLinkList = new JComboBox<String>(comboModel);
         hyperLinkList.setEditable(false);
         hyperLinkList.addItemListener(this);
-        if(hyperLinkList.getItemCount() == 0){
-        	hyperLinkList.setEnabled(false);
-        }
+//        if(hyperLinkList.getItemCount() == 0){
+//        	hyperLinkList.setEnabled(false);
+//        }
         create.addActionListener(this);
         //connect.addActionListener(this);
         add.addActionListener(this);
@@ -230,7 +228,6 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         leftSlider.setValue(0);
         leftSlider.setPaintTicks(true);
         leftSlider.setPaintLabels(true);
-        leftSlider.addMouseListener(this);
         leftSlider.addChangeListener(this);
         
         rightSlider = new JSlider(0, 9000);
@@ -240,7 +237,6 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
         rightSlider.setEnabled(false);
         rightSlider.setPaintTicks(true);
         rightSlider.setPaintLabels(true);
-        rightSlider.addMouseListener(this);
         rightSlider.addChangeListener(this);
          
         leftProgressTime = new JTextField("Frame 0001");
@@ -458,7 +454,7 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 		        					selectedRightName, selectedRightFrame);
 		        		
 		        		try {
-							ObjectTagger.autoTagging(newLink, videos[leftListTracker], leftFrameCounter, 8, 50, 2);
+							ObjectTagger.autoTagging(newLink, videos[leftListTracker], leftFrameCounter, 8, 50, 5);
 						} catch (Exception e1) {
 							JOptionPane.showMessageDialog(frame, "Auto Tagging Failed!");
 						}
@@ -518,33 +514,22 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 				e1.printStackTrace();
 			}
         }
+        if(e.getSource() == player){
+            frame.dispose();
+            new VideoPlayer(videos);
+        }
     }
  
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        //Retrieves the mouse position relative to the component origin.
-        int mouseX = e.getX();
-        if(e.getSource() == leftSlider) {
-            int sliderVal = (int)Math.round(((double)mouseX / (double)leftSlider.getWidth()) * leftSlider.getMaximum());
-            leftSlider.setValue(sliderVal);
-            leftProgressTime.setText("Frame " + String.format("%04d", sliderVal));
-            leftFrameCounter = sliderVal;  
-            updateImage(0);
-        }
-        if(e.getSource() == rightSlider && rightSlider.isEnabled()) {
-            int sliderVal = (int)Math.round(((double)mouseX / (double)rightSlider.getWidth()) * rightSlider.getMaximum());
-            rightSlider.setValue(sliderVal);
-            rightProgressTime.setText("Frame " + String.format("%04d", sliderVal));
-            rightFrameCounter = sliderVal;  
-            updateImage(1);
-        }
-    }
-
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if(e.getSource() == leftSlider) {
             creating = false;
-            hyperLinkList.setSelectedIndex(-1);
+            if(hyperLinkList.getItemCount() == 0){
+            	hyperLinkList.setSelectedIndex(-1);
+            }
+            else{
+            	hyperLinkList.setSelectedIndex(0);
+            }
 			int sliderVal = leftSlider.getValue();
             if(sliderVal < 9000) {
                 leftProgressTime.setText("Frame " + String.format("%04d", sliderVal + 1));
@@ -579,26 +564,4 @@ public class VideoEditor implements ListSelectionListener, ActionListener, Mouse
 			updateImage(0);
 		}
 	}
- 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-         
-    }
- 
-    @Override
-    public void mouseExited(MouseEvent e) {
-        // TODO Auto-generated method stub
-         
-    }
- 
-    @Override
-    public void mousePressed(MouseEvent e) {
-         
-    }
- 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-         
-    }
-
 }
