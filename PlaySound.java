@@ -65,8 +65,8 @@ public class PlaySound {
                     audioBuffer = new byte[this.EXTERNAL_BUFFER_SIZE];
                     readBytes = audioInputStream.read(audioBuffer, 0, audioBuffer.length - offset);
                     
-                    System.out.println(readBytes);
-                    System.out.println(audioInputStream.available() + "  " + seconds + "   " + n);
+//                    System.out.println(readBytes);
+//                    System.out.println(audioInputStream.available() + "  " + seconds + "   " + n);
                     audioInputStream.skip(n);
                 }
                 else{
@@ -75,12 +75,12 @@ public class PlaySound {
                 }
                 if (readBytes >= 0){
                     dataLine.write(audioBuffer, offset, readBytes);
-                    //bytesRead += readBytes;
-                    //long totalFrames = audioInputStream.getFrameLength(); 
-                    //long framesRead = bytesRead / audioFormat.getFrameSize();
-                    //int totalSeconds = (int) (totalFrames / audioFormat.getSampleRate());
-                    //double elapsedSeconds = ((double) framesRead / (double) totalFrames) * totalSeconds;
-                    //System.out.println(n);
+//                    bytesRead += readBytes;
+//                    long totalFrames = audioInputStream.getFrameLength(); 
+//                    long framesRead = bytesRead / audioFormat.getFrameSize();
+//                    int totalSeconds = (int) (totalFrames / audioFormat.getSampleRate());
+//                    double elapsedSeconds = ((double) framesRead / (double) totalFrames) * totalSeconds;
+//                    System.out.println(n);
                 }
             }
         }catch (IOException e1) {

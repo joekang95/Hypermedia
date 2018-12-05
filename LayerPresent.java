@@ -1,10 +1,12 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
@@ -12,7 +14,7 @@ import javax.swing.JPanel;
 
 
 @SuppressWarnings("serial")
-public class LayerPresent extends JPanel implements MouseListener {
+public class LayerPresent extends JPanel implements MouseListener, MouseMotionListener {
 	
 	private int alpha = 127;
     private Color color;
@@ -54,6 +56,7 @@ public class LayerPresent extends JPanel implements MouseListener {
         this.setBounds(x1, y1, sizeX, sizeY);
 		setFocusable(true);
 		addMouseListener(this);
+		addMouseMotionListener(this);
 		this.requestFocus();
     }
 
@@ -80,7 +83,6 @@ public class LayerPresent extends JPanel implements MouseListener {
     	this.links = links;
     }
     
-    
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		Point p = e.getPoint();
@@ -94,31 +96,53 @@ public class LayerPresent extends JPanel implements MouseListener {
 			if(p.x >= x1 && p.x <= x2 && p.y >= y1 && p.y <= y2){
 				this.click = link;
 				clickDetected = true;
+			    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			}
+		}
+	}
+	
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		Point p = e.getPoint();
+		for(HyperLink link : links){
+			int x1 = link.getX();
+			int x2 = x1 + link.getWidth();
+			int y1 = link.getY();
+			int y2 = y1 + link.getHeight();
+			
+			if(p.x >= x1 && p.x <= x2 && p.y >= y1 && p.y <= y2){
+			    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			}
+			else{
+			    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			}
 		}
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		
+	}
+
+	
 }
