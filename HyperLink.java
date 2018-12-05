@@ -116,6 +116,7 @@ public class HyperLink {
 	
 	public JSONObject toJson() throws JSONException {
 		JSONObject obj = new JSONObject();
+		obj.put("id", id);
 		obj.put("x", x);
 		obj.put("y", y);
 		obj.put("width", width);
